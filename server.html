@@ -38,10 +38,15 @@
         
         Game.ball.x += Game.ball.xvel;
         Game.ball.y += Game.ball.yvel;
+
+        // Bounds checking: Bottom wall hit
         if (Game.ball.y > canvas._canvas.height - (1.5 * Game.blockSize)) {
             Game.ball.y = canvas._canvas.height - (1.5 * Game.blockSize);
             Game.ball.yvel = -Game.ball.vel;
+            Game.sounds.ping.play();
         }
+
+        // Bounds checking, player 2
         var borderWidth = (2 * Game.blockSize);
         var yPct = (Game.ball.y / canvas._canvas.height * 100);
         if (Game.ball.x > canvas._canvas.width - (3.5 * Game.blockSize)) {
@@ -53,6 +58,7 @@
             if (isWithinPlayer2Paddle) {
                 Game.ball.x = canvas._canvas.width - (3.5 * Game.blockSize);
                 Game.ball.xvel = -Game.ball.vel;
+                Game.sounds.pong.play();
             } else {
                 Game.score[0]++;
                 // Reset the ball
@@ -62,10 +68,16 @@
                 Game.ball.yvel = Game.ball.vel;
             }
         }
+
+        // Bounds checking: Top wall hit
         if (Game.ball.y < (1.5 * Game.blockSize)) {
             Game.ball.y = (1.5 * Game.blockSize);
             Game.ball.yvel = Game.ball.vel;
+            Game.sounds.ping.play();
         }
+
+
+        // Bounds checking, player 1
         if (Game.ball.x < (3.5 * Game.blockSize)) {
             var player1HalfPaddle = ~~(Game.players[0].paddleWidth / 2);
             var isWithinPlayer1Paddle = (
@@ -75,6 +87,7 @@
             if (isWithinPlayer1Paddle) {
                 Game.ball.x = 3.5 * Game.blockSize;
                 Game.ball.xvel = Game.ball.vel;
+                Game.sounds.pong.play();
             } else {
                 Game.score[1]++;
                 // Reset the ball
@@ -167,11 +180,20 @@
             Game.blockSize, Game.blockSize
         );
     };
+    Game.init = function() {
+        // Set the initial ball position
+        Game.ball.x = ~~(canvas._canvas.width / 4);
+        Game.ball.y = ~~(canvas._canvas.height / 2);
+        // Load the sounds
+        Game.sounds = {
+            ping: new Audio('ping.mp3'),
+            pong: new Audio('pong.mp3')
+        };
+    }
 
     /* global canvas */
     canvas.create();
-    Game.ball.x = ~~(canvas._canvas.width / 4);
-    Game.ball.y = ~~(canvas._canvas.height / 2);
+    Game.init();
     canvas.cycle(Game.update, Game.draw);
 </script></body>
 </html>
