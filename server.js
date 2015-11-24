@@ -59,15 +59,14 @@ player.on('connect', function(playerSocket) {
     playerSocket.emit('player', player);
     
     playerSocket.on('player', function(playerData) {
-      var playerIdx = undefined;
-      players.forEach(function (p, idx) {
+      // Update the data for the given player
+      players.forEach(function (p) {
         if (p.socketId === playerData.socketId) {
-          playerIdx = idx;
+          p.centerPos = playerData.centerPos;
+          p.paddleWidth = playerData.paddleWidth;
         }
       });
-      if (playerIdx) {
-        players[playerIdx] = playerData;
-      }
+      // notify the host of player data change
       updatePlayers();
     });
     
@@ -76,8 +75,13 @@ player.on('connect', function(playerSocket) {
       console.log('player disconnected');
       players = players.filter(function(p) {
         return p.socketId !== playerSocket.id;
+      })
+      players.forEach(function(p, idx) {
+        // Reassign player number
+        p.number = idx + 1;
       });
       updatePlayers();
+      // TOOD: notify the other player their number may have changed
     })
   } else {
     // notify the player there aren't any spots left, or put them into a queue

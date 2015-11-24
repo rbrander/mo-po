@@ -18,6 +18,10 @@ canvas.create = function() {
     canvas._canvas.width = window.innerWidth;
     canvas._canvas.height = window.innerHeight;
     canvas._ctx = canvas._canvas.getContext('2d');
+    window.addEventListener('resize', function() {
+        canvas._canvas.width = window.innerWidth;
+        canvas._canvas.height = window.innerHeight;
+    });
     document.body.appendChild(canvas._canvas);
 }
 
