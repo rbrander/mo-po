@@ -7,15 +7,18 @@
     <script type="text/javascript" src="canvas.js"></script>
 </head>
 <body style="margin:0;overflow:hidden;"><script>
-    var Game = {};
-    Game.hostConnected = false;
-    Game.players = [];
-    Game.score = [0, 0];
-    Game.blockSize = 10;    // 10x10
-    Game.ball = {
-        x: 0,
-        y: 0,
-        vel: 2
+    var Game = {
+        hostConnected: false,
+        players: [],
+        sounds: [],
+        score: [0, 0],
+        blockSize: 10,  // in pixels
+        ball: {
+            x: 0,
+            y: 0,
+            vel: 2
+        },
+        running: false
     };
     Game.ball.xvel = Game.ball.yvel = Game.ball.vel;
 
@@ -34,6 +37,10 @@
     Game.update = function() {
         if (!Game.ready()) {
             return;
+        }
+        if (!Game.running) {
+            Game.sounds.coin.play();
+            Game.running = true;
         }
         
         Game.ball.x += Game.ball.xvel;
@@ -61,6 +68,7 @@
                 Game.sounds.pong.play();
             } else {
                 Game.score[0]++;
+                Game.sounds.miss.play();
                 // Reset the ball
                 Game.ball.x = ~~(canvas._canvas.width / 4);
                 Game.ball.y = ~~(canvas._canvas.height / 2);
@@ -76,7 +84,6 @@
             Game.sounds.ping.play();
         }
 
-
         // Bounds checking, player 1
         if (Game.ball.x < (3.5 * Game.blockSize)) {
             var player1HalfPaddle = ~~(Game.players[0].paddleWidth / 2);
@@ -90,6 +97,7 @@
                 Game.sounds.pong.play();
             } else {
                 Game.score[1]++;
+                Game.sounds.miss.play();
                 // Reset the ball
                 Game.ball.x = ~~(canvas._canvas.width / 4) * 3;
                 Game.ball.y = ~~(canvas._canvas.height / 2);
@@ -187,7 +195,9 @@
         // Load the sounds
         Game.sounds = {
             ping: new Audio('ping.mp3'),
-            pong: new Audio('pong.mp3')
+            pong: new Audio('pong.mp3'),
+            miss: new Audio('splat.wav'),
+            coin: new Audio('coin.wav')
         };
     }
 
