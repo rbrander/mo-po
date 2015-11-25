@@ -14,7 +14,7 @@ app.get('/*.wav', function(req, res) { res.sendFile(__dirname + req.url); });
 
 var Player = function() {
   this.centerPos = 50;  // 50% from 0 (width/height)
-  this.paddleWidth = 30; // 30% of screen height is the paddle width
+  this.paddleWidth = 25; // 25% of screen height is the paddle width
   return this;
 }
 
