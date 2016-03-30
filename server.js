@@ -9,8 +9,7 @@ var PORT = 8080;
 app.get('/', function(req, res) { res.sendFile(__dirname + '/server.html'); });
 app.get('/player', function(req, res) { res.sendFile(__dirname + '/player.html'); });
 app.get('/canvas.js', function(req, res) { res.sendFile(__dirname + '/canvas.js'); });
-app.get('/p[io]ng.mp3', function(req, res) { res.sendFile(__dirname + req.url); });
-app.get('/*.wav', function(req, res) { res.sendFile(__dirname + req.url); });
+app.get('/assets/*', function(req, res) { res.sendFile(__dirname + req.url); });
 
 var Player = function() {
   this.centerPos = 50;  // 50% from 0 (width/height)

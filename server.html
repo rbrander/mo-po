@@ -195,10 +195,10 @@
         Game.ball.y = ~~(canvas._canvas.height / 2);
         // Load the sounds
         Game.sounds = {
-            ping: new Audio('ping.mp3'),
-            pong: new Audio('pong.mp3'),
-            miss: new Audio('splat.wav'),
-            coin: new Audio('coin.wav')
+            ping: new Audio('/assets/ping.mp3'),
+            pong: new Audio('/assets/pong.mp3'),
+            miss: new Audio('/assets/splat.wav'),
+            coin: new Audio('/assets/coin.wav')
         };
         window.addEventListener('keyup', function(e) {
             switch (e.which) {
