@@ -116,20 +116,23 @@
         // draw the status until we have two players and a host connect to the server
         if (!Game.ready()) {
             // draw host status
-            canvas._ctx.font = '56px Arial';
-            canvas._ctx.fillStyle = 'white';
-            canvas._ctx.textBaseline = 'top';
-            canvas._ctx.fillText(Game.hostConnected ? 'Host Connected' : 'connecting...', 100, 100);
+            ctx.font = '56px Arial';
+            ctx.fillStyle = 'white';
+            ctx.textBaseline = 'top';
+            ctx.fillText(Game.hostConnected ? 'Host Connected' : 'connecting...', 100, 100);
             
             // draw player status
             var playerMsg = 'waiting for players...';
             if (Game.players.length == 1) {
                 playerMsg = '1 player connected, waiting for a second player...';
             }
-            canvas._ctx.font = '18px Arial';
-            canvas._ctx.fillStyle = '#ddd';
-            canvas._ctx.fillText(playerMsg, 100, 165);
+            ctx.font = '18px Arial';
+            ctx.fillStyle = '#ddd';
+            ctx.fillText(playerMsg, 100, 165);
         } else {
+            // draw the background image
+            ctx.drawImage(Game.imgBackground, 0, 0,
+                canvas._canvas.width, canvas._canvas.height);
             // TODO: it would be cool to have an animation "Game on..." fade
             Game.drawBoard();
             Game.drawPlayers();
@@ -200,6 +203,8 @@
             miss: new Audio('/assets/splat.wav'),
             coin: new Audio('/assets/coin.wav')
         };
+        Game.imgBackground = new Image(canvas._canvas.width, canvas._canvas.height);
+        Game.imgBackground.src = '/assets/background.png';
         window.addEventListener('keyup', function(e) {
             switch (e.which) {
                 case 189: // '-' key DECR
