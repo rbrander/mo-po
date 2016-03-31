@@ -5,12 +5,31 @@ var http = require('http').Server(app);
 var io = require('socket.io')(http);
 var PORT = 8080;
 
-// setup the default route to serve up server.html
-app.get('/', function(req, res) { res.sendFile(__dirname + '/player.html'); });
-app.get('/host', function(req, res) { res.sendFile(__dirname + '/server.html'); });
-app.get('/server', function(req, res) { res.sendFile(__dirname + '/server.html'); });
-app.get('/canvas.js', function(req, res) { res.sendFile(__dirname + '/canvas.js'); });
-app.get('/assets/*', function(req, res) { res.sendFile(__dirname + req.url); });
+// ROUTES
+// - root will be for client files
+app.get('/', function(req, res) {
+  res.redirect('/client/client.html');
+});
+app.get('/client/:file', function(req, res) {
+  res.sendFile(__dirname + '/client/' + req.params.file);
+});
+// - server path will be for server files
+app.get('/server', function(req, res) { 
+  res.redirect('/server/server.html');
+});
+app.get('/server/:file', function(req, res) {
+  res.sendFile(__dirname + '/server/' + req.params.file);
+});
+
+app.get('/assets/*', function(req, res) {
+  res.sendFile(__dirname + req.url);
+});
+app.get('/shared/*', function(req, res) {
+  res.sendFile(__dirname + req.url);
+});
+// app.get('/assets/*', function(req, res) { res.sendFile(__dirname + req.url); });
+
+
 
 var Player = function() {
   this.centerPos = 50;  // 50% from 0 (width/height)
