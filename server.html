@@ -18,7 +18,9 @@
             y: 0,
             vel: 2
         },
-        running: false
+        running: false,
+        themePrimary:'#E33231', // red
+        themeSecondary: '#422E51', // purple
     };
     Game.ball.xvel = Game.ball.yvel = Game.ball.vel;
 
@@ -168,6 +170,7 @@
             var paddleCenter = (player.centerPos / 100) * tableWidth;
             var paddleTop = paddleCenter - (paddleHeight / 2);
             var xOffset = (idx % 2 == 0 ? (2 * Game.blockSize) : canvas._canvas.width - (3 * Game.blockSize)); 
+            ctx.fillStyle = 'white';
             ctx.fillRect(xOffset, paddleTop, Game.blockSize, paddleHeight);
         });
     };
@@ -175,7 +178,7 @@
         // Typically the old-skool version had a big pixelated number
         // in each table side
         var ctx = canvas._ctx;
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = Game.themePrimary;
         ctx.font = '88px Arial';
         ctx.textBaseline = 'top';
         Game.score.forEach(function(score, idx){
