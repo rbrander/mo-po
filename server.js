@@ -6,8 +6,9 @@ var io = require('socket.io')(http);
 var PORT = 8080;
 
 // setup the default route to serve up server.html
-app.get('/', function(req, res) { res.sendFile(__dirname + '/server.html'); });
-app.get('/player', function(req, res) { res.sendFile(__dirname + '/player.html'); });
+app.get('/', function(req, res) { res.sendFile(__dirname + '/player.html'); });
+app.get('/host', function(req, res) { res.sendFile(__dirname + '/server.html'); });
+app.get('/server', function(req, res) { res.sendFile(__dirname + '/server.html'); });
 app.get('/canvas.js', function(req, res) { res.sendFile(__dirname + '/canvas.js'); });
 app.get('/assets/*', function(req, res) { res.sendFile(__dirname + req.url); });
 
