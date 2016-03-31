@@ -30,7 +30,7 @@
     socket.on('connect', function() {
         console.log('connected to /host');
         Game.hostConnected = true;
-        
+
         socket.on('players', function(data) {
             Game.players = data;
         });
@@ -117,20 +117,22 @@
         
         // draw the status until we have two players and a host connect to the server
         if (!Game.ready()) {
-            // draw host status
-            ctx.font = '56px Arial';
+            // draw a background image
+            ctx.drawImage(Game.imgStartScreen, 0, 0,
+                canvas._canvas.width, canvas._canvas.height);
+
+            // build a status message to display
+            var hostMessage = 'Host connect' + (Game.hostConnected ? 'ed' : 'ing');
+            var playerMsg = Game.players.length > 0 ?
+                '1 player connected, and waiting for a second player...' :
+                'waiting for players...';
+            var statusMessage = hostMessage + ', ' + playerMsg;
+
+            // draw the status message
+            ctx.font = '16px Arial';
             ctx.fillStyle = 'white';
             ctx.textBaseline = 'top';
-            ctx.fillText(Game.hostConnected ? 'Host Connected' : 'connecting...', 100, 100);
-            
-            // draw player status
-            var playerMsg = 'waiting for players...';
-            if (Game.players.length == 1) {
-                playerMsg = '1 player connected, waiting for a second player...';
-            }
-            ctx.font = '18px Arial';
-            ctx.fillStyle = '#ddd';
-            ctx.fillText(playerMsg, 100, 165);
+            ctx.fillText(statusMessage, 100, canvas._canvas.height - 70);
         } else {
             // draw the background image
             ctx.drawImage(Game.imgBackground, 0, 0,
@@ -208,6 +210,8 @@
         };
         Game.imgBackground = new Image(canvas._canvas.width, canvas._canvas.height);
         Game.imgBackground.src = '/assets/background.png';
+        Game.imgStartScreen = new Image(canvas._canvas.width, canvas._canvas.height);
+        Game.imgStartScreen.src = '/assets/start-screen.gif';
         window.addEventListener('keyup', function(e) {
             switch (e.which) {
                 case 189: // '-' key DECR
