@@ -55,6 +55,10 @@ player.on('connect', function(playerSocket) {
     var player = new Player();
     player.socketId = playerSocket.id;
     player.number = (players.length + 1);
+    player.firstName = 'Player ' + player.number;
+    player.lastName = '';
+    player.email = 'pong@rangle.io';
+    player.optIn = true;
     players.push(player);
     updatePlayers();
     

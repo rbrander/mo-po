@@ -5,6 +5,12 @@
     <title>Mo-Po :: Mobile Pong</title>
     <script type="text/javascript" src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script type="text/javascript" src="canvas.js"></script>
+    <style>
+        @font-face {
+            font-family: Arcade;
+            src: url(/assets/fonts/Arcade.ttf);
+        }
+    </style>
 </head>
 <body style="margin:0;overflow:hidden;"><script>
     var Game = {
@@ -181,11 +187,16 @@
         // in each table side
         var ctx = canvas._ctx;
         ctx.fillStyle = Game.themePrimary;
-        ctx.font = '88px Arial';
         ctx.textBaseline = 'top';
+        ctx.textAlign = 'center';
         Game.score.forEach(function(score, idx){
             var x = (idx == 0 ? canvas._canvas.width / 4 : (canvas._canvas.width / 4) * 3);
-            ctx.fillText(score.toString(), x, 40);
+            // draw the score
+            ctx.font = '120px Arcade';
+            ctx.fillText(score.toString(), x, 100);
+            // draw the name
+            ctx.font = '60px Arcade';
+            ctx.fillText(Game.players[idx].firstName, x, 60);
         });
     };
     Game.drawBall = function() {
