@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+<head>
+<style>body { font: '32px Arial'; margin: 0; padding: 0; background-color: black; color: white; }</style>
+</head>
+<body>
+<h1 style="margin: 50px">Loading...</h1>
+<canvas id="canvas" width="600" height="400">Canvas is not supported!</canvas>
+<script type="text/javascript">
+/*
+var c=document.getElementById("canvas");
+var ctx=c.getContext("2d");
+ctx.fillStyle = 'black';
+ctx.fillRect(20,20,150,100);
+ctx.fillStyle = 'red';
+ctx.fillRect(40,40, 300, 200);
+*/
+window.setTimeout(function(){ window.location.assign('http://localhost/server'); }, 6000);
+</script>
+</body>
+</html>

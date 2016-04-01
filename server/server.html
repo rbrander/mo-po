@@ -47,7 +47,9 @@
             return;
         }
         if (!Game.running) {
-            Game.sounds.coin.play();
+            if (Game.playSounds) {
+                Game.sounds.coin.play();
+            }
             Game.running = true;
         }
         
@@ -58,7 +60,9 @@
         if (Game.ball.y > canvas._canvas.height - (1.5 * Game.blockSize)) {
             Game.ball.y = canvas._canvas.height - (1.5 * Game.blockSize);
             Game.ball.yvel = -Game.ball.vel;
-            Game.sounds.ping.play();
+            if (Game.playSounds) {
+                Game.sounds.ping.play();
+            }
         }
 
         // Bounds checking, player 2
@@ -73,10 +77,14 @@
             if (isWithinPlayer2Paddle) {
                 Game.ball.x = canvas._canvas.width - (3.5 * Game.blockSize);
                 Game.ball.xvel = -Game.ball.vel;
-                Game.sounds.pong.play();
+                if (Game.playSounds) {
+                    Game.sounds.pong.play();
+                }
             } else {
                 Game.score[0]++;
-                Game.sounds.miss.play();
+                if (Game.playSounds) {
+                    Game.sounds.miss.play();
+                }
                 // Reset the ball
                 Game.ball.x = ~~(canvas._canvas.width / 4);
                 Game.ball.y = ~~(canvas._canvas.height / 2);
@@ -89,7 +97,9 @@
         if (Game.ball.y < (1.5 * Game.blockSize)) {
             Game.ball.y = (1.5 * Game.blockSize);
             Game.ball.yvel = Game.ball.vel;
-            Game.sounds.ping.play();
+            if (Game.playSounds) {
+                Game.sounds.ping.play();
+            }
         }
 
         // Bounds checking, player 1
@@ -102,10 +112,14 @@
             if (isWithinPlayer1Paddle) {
                 Game.ball.x = 3.5 * Game.blockSize;
                 Game.ball.xvel = Game.ball.vel;
-                Game.sounds.pong.play();
+                if (Game.playSounds) {
+                    Game.sounds.pong.play();
+                }
             } else {
                 Game.score[1]++;
-                Game.sounds.miss.play();
+                if (Game.playSounds) {
+                    Game.sounds.miss.play();
+                }
                 // Reset the ball
                 Game.ball.x = ~~(canvas._canvas.width / 4) * 3;
                 Game.ball.y = ~~(canvas._canvas.height / 2);
@@ -213,12 +227,18 @@
         Game.ball.x = ~~(canvas._canvas.width / 4);
         Game.ball.y = ~~(canvas._canvas.height / 2);
         // Load the sounds
-        Game.sounds = {
-            ping: new Audio('/assets/ping.mp3'),
-            pong: new Audio('/assets/pong.mp3'),
-            miss: new Audio('/assets/splat.wav'),
-            coin: new Audio('/assets/coin.wav')
-        };
+        Game.playSounds = true;
+        try {
+            Game.sounds = {
+                ping: new Audio('/assets/ping.mp3'),
+                pong: new Audio('/assets/pong.mp3'),
+                miss: new Audio('/assets/splat.wav'),
+                coin: new Audio('/assets/coin.wav')
+            };
+        } catch (err) {
+            Game.playSounds = false;
+        }
+        // Load images
         Game.imgBackground = new Image(canvas._canvas.width, canvas._canvas.height);
         Game.imgBackground.src = '/assets/background.png';
         Game.imgStartScreen = new Image(canvas._canvas.width, canvas._canvas.height);
