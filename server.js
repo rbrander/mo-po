@@ -3,7 +3,7 @@
 var app = require('express')();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var PORT = 8080;
+var PORT = process.env.PONG_PORT || 8080;
 
 // ROUTES
 // - root will be for client files

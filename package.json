@@ -5,6 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "package": "./package.sh",
+    "send": "scp package.tar.gz pi@192.168.1.149:package.tar.gz",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
