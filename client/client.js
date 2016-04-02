@@ -1,0 +1,111 @@
+// client.js
+
+var touchX = null;
+var touchY = null;
+
+var Game = {};
+Game.update = function() {
+    // TODO: move logic from onTouchMove to here, 
+    // because onTouchMove should only be setting state/data
+};
+Game.draw = function() {
+    
+    // TODO: add code that will display the status of the host (up/down)
+    //       or if waiting for another player
+    
+    canvas.clearBackground();
+    
+    var ctx = canvas._ctx;
+    
+    ctx.font = '70px Arial';
+    ctx.fillStyle = 'white';
+    ctx.textBaseline = 'top';
+    
+    if (Game.player) {
+        ctx.fillText('Player ' + Game.player.number, 20, 20);
+        // draw the bar
+        var centerY = ~~((Game.player.centerPos / 100) * canvas._canvas.height);
+        var height = ~~((Game.player.paddleWidth / 100) * canvas._canvas.height);
+        var y = ~~(centerY - (height / 2));
+        var width = ~~(height * 0.2); //~~(canvas._canvas.width * 0.2);
+        var x = ~~((canvas._canvas.width / 2) - (width / 2));
+        ctx.fillStyle = 'white';
+        ctx.fillRect(x, y, width, height);
+    } else {
+        // loading
+        ctx.fillText('Loading...', 20, 20);
+    }
+    
+};
+Game.setTouchPos = function(e) {
+    var touch = e.targetTouches[0];
+    Game.touchX = ~~touch.pageX;
+    Game.touchY = ~~touch.pageY;
+}
+Game.onTouchStart = function(e) {
+    e.preventDefault();
+    
+    Game.touching = true;
+    Game.setTouchPos(e);
+    Game.setYOffset();            
+};
+Game.setYOffset = function() {
+    var centerPx = (Game.player.centerPos / 100) * canvas._canvas.height;
+    Game.yOffset = Game.touchY - centerPx;
+};
+Game.onTouchMove = function(e) {
+    Game.setTouchPos(e);
+    
+    // Calculate the next position
+    var dy = Game.touchY - Game.yOffset;
+    var yPct = ~~(dy * 100 / canvas._canvas.height);
+
+    // Bounds checking
+    var centerPos = Game.player.centerPos;
+    var halfPaddleWidth = ~~(Game.player.paddleWidth / 2);
+    if (yPct - halfPaddleWidth <= 0) {
+        Game.player.centerPos = halfPaddleWidth;
+        Game.setYOffset();
+    } else if (yPct + halfPaddleWidth >= 100) {
+        Game.player.centerPos = 100 - halfPaddleWidth;
+    } else {
+        Game.player.centerPos = yPct;
+    }
+    
+    // Notify the server if there is a change
+    if (centerPos != Game.player.centerPos) {
+        Game.player.timeOffset = (new Date()).valueOf();
+        socket.emit('player', Game.player);
+    }
+};
+Game.onTouchEnd = function(e) {
+    Game.touching = false;
+};
+Game.onTouchCancel = function(e) {
+    Game.touching = false;
+};
+
+/* global io */
+var socket = io('/player');
+socket.on('connect', function() {
+    console.log('connected to /player socket');
+    
+    // listen for disconnect, game over
+    socket.on('disconnect', function() {
+        
+    });
+    
+    socket.on('player', function(playerData) {
+        if (!Game.player) {
+            canvas._canvas.addEventListener("touchcancel", Game.onTouchCancel, false);
+            canvas._canvas.addEventListener("touchstart", Game.onTouchStart, false);
+            canvas._canvas.addEventListener("touchmove", Game.onTouchMove, false);
+            canvas._canvas.addEventListener("touchend", Game.onTouchEnd, false);
+        }
+        Game.player = playerData;
+    });
+});
+
+/* global canvas */
+canvas.create();
+canvas.cycle(Game.update, Game.draw);
