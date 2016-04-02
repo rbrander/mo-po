@@ -1,4 +1,4 @@
-// server.js
+// host.js
 
 var Game = {
     hostConnected: false,

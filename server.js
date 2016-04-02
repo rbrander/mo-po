@@ -13,12 +13,12 @@ app.get('/', function(req, res) {
 app.get('/client/:file', function(req, res) {
   res.sendFile(__dirname + '/client/' + req.params.file);
 });
-// - server path will be for server files
-app.get('/server', function(req, res) { 
-  res.redirect('/server/server.html');
+// - host path will be for server files
+app.get('/host', function(req, res) { 
+  res.redirect('/host/host.html');
 });
-app.get('/server/:file', function(req, res) {
-  res.sendFile(__dirname + '/server/' + req.params.file);
+app.get('/host/:file', function(req, res) {
+  res.sendFile(__dirname + '/host/' + req.params.file);
 });
 
 app.get('/assets/*', function(req, res) {
