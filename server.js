@@ -2,13 +2,16 @@
 // learned from http://socket.io/get-started/chat/
 var app = require('express')();
 var http = require('http').Server(app);
+var formBody = require('body/form');
 var io = require('socket.io')(http);
+var fs = require('fs');
 var PORT = process.env.PONG_PORT || 8080;
+var USER_DATA = __dirname + '/userdata.txt';
 
 // ROUTES
 // - root will be for client files
 app.get('/', function(req, res) {
-  res.redirect('/client/client.html');
+  res.redirect('/client/login.html');
 });
 app.get('/client/:file', function(req, res) {
   res.sendFile(__dirname + '/client/' + req.params.file);
@@ -27,8 +30,34 @@ app.get('/assets/*', function(req, res) {
 app.get('/shared/*', function(req, res) {
   res.sendFile(__dirname + req.url);
 });
-// app.get('/assets/*', function(req, res) { res.sendFile(__dirname + req.url); });
 
+app.post('/client/login.html', function(req, res) {
+  formBody(req, res, function (err, body) {
+    if (err) {
+      res.statusCode = 500
+      return res.end('ERROR');
+    }
+
+    // body will contain all values from the form: 
+    //    firstName, lastName, email, and optIn (if selected)
+    // optIn will only be set (to 'on') when checkbox is selected
+    // To ensure there is an 'off' value, it is assigned unless there is a value
+    body.optIn = body.optIn || 'off';
+    // Append on a datetime stamp of when the user logged in
+    var created = new Date();
+    body.created = created.valueOf();
+    body.createdStr = created.toLocaleString();
+    
+    // Story user data
+    fs.appendFile(USER_DATA, JSON.stringify(body) + '\n', function(err) {
+      console.error('Error writing user data: ' + err);
+    });
+
+    // Send the user to the game
+    return res.redirect('/client/client.html?name=' + 
+      encodeURIComponent(body.firstName));
+  })
+});
 
 
 var Player = function() {

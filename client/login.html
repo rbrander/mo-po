@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Mo-Po :: Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .hidden {
+            display:none;
+        }
+    </style>
+    <script type="text/javascript">
+        // NOTE: found on http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
+        function validateEmail(email) {
+            var re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(email);
+        }
+
+        function validateForm() {
+            var hasError = false;
+            var frmLogin = document.forms['frmLogin'];
+
+            // VALIDATION
+
+            // first name validation
+            var firstName = frmLogin['firstName'].value;
+            var hasFirstNameError = (firstName.length === 0);
+            document.getElementById('errFirstName').className = 'error ' +
+                (hasFirstNameError ? '' : 'hidden');
+            hasError |= hasFirstNameError;
+
+            // Last name validation
+            var lastName = frmLogin['lastName'].value;
+            var hasLastNameError = (lastName.length === 0);
+            document.getElementById('errLastName').className = 'error ' +
+                (hasLastNameError ? '' : 'hidden');
+            hasError |= hasLastNameError;
+
+            // email validation
+            var email = frmLogin['email'].value;
+            var hasEmailError = (email.length === 0 || !validateEmail(email));
+            document.getElementById('errEmail').className = 'error ' +
+                (hasEmailError ? '' : 'hidden');
+            hasError |= hasEmailError;
+
+            return !hasError;
+        }
+    </script>
+</head>
+<body style="margin:0">
+    <div class="container">
+        <h2>Rangle Up</h2>
+        <form id="frmLogin" name="frmLogin" method="POST" onsubmit="return validateForm()">
+            <div>Please provide your name and email to play<div>
+            <br />
+            <div class="form-group">
+                <label for="txtFirstName">First Name:</label>
+                <input type="text" id="txtFirstName" name="firstName" maxlength="20" class="form-control" placeholder="First Name" />
+                <span id="errFirstName" class="error hidden">First name is required</span>
+            </div>
+            <div class="form-group">
+                <label for="txtLastName">Last Name:</label>
+                <input type="text" id="txtLastName" name="lastName" maxlength="20" class="form-control" placeholder="Last Name" />
+                <span id="errLastName" class="error hidden">Last name is required</span>
+            </div>
+            <div class="form-group">
+                <label for="txtEmail">Email:</label>
+                <input type="text" id="txtEmail" name="email" maxlength="100" class="form-control" placeholder="Email" />
+                <span id="errEmail" class="error hidden">Invalid or missing email address</span>
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="chkOptIn" name="optIn" checked />
+                <label for="chkOptIn">Allow rangle.io to contact me</label>
+            </div>
+            <div class="form-group">
+                <input type="submit" class="form-control" value="Login" />
+            </div>
+        </form>
+    </div>
+</body>
+</html>
