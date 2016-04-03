@@ -9,13 +9,16 @@ var Game = {
     ball: {
         x: 0,
         y: 0,
+        xvel: 2,
+        yvel: 2,
         vel: 2
     },
     running: false,
+    ended: false,
     themePrimary:'#E33231', // red
     themeSecondary: '#422E51', // purple
+    timeStart: null,
 };
-Game.ball.xvel = Game.ball.yvel = Game.ball.vel;
 
 
 /* global io */
@@ -23,23 +26,32 @@ var socket = io('/host');
 socket.on('connect', function() {
     console.log('connected to /host socket');
     Game.hostConnected = true;
-
     socket.on('players', function(data) {
         Game.players = data;
     });
 });
 
 Game.update = function() {
-    if (!Game.ready()) {
+    if (!Game.ready() || Game.ended) {
         return;
     }
-    if (!Game.running) {
+    if (!Game.running && !Game.ended) {
         if (Game.playSounds) {
             Game.sounds.coin.play();
         }
+        Game.timeStart = new Date();
+        // increase the speed every 10 seconds
+        setInterval(Game.increaseSpeed, 10000);        
         Game.running = true;
     }
+
+    // Check for end of game
+    Game.ended = (new Date().valueOf() - Game.timeStart) > (2 * 60 * 1000);
+    if (Game.ended) {
+        Game.running = false;
+    }
     
+    // Update the ball location based on velocity
     Game.ball.x += Game.ball.xvel;
     Game.ball.y += Game.ball.yvel;
 
@@ -140,6 +152,12 @@ Game.draw = function() {
         ctx.fillStyle = 'white';
         ctx.textBaseline = 'top';
         ctx.fillText(statusMessage, 100, canvas._canvas.height - 70);
+    } else if (Game.ended) {
+        // draw game over screen
+        ctx.font = '120px Arcade';
+        ctx.fillStyle = Game.themePrimary;
+        ctx.textBaseline = 'middle';
+        ctx.fillText("Game Over", canvas._canvas.width / 2, canvas._canvas.height / 2);
     } else {
         // draw the background image
         ctx.drawImage(Game.imgBackground, 0, 0,
@@ -148,9 +166,10 @@ Game.draw = function() {
         Game.drawBoard();
         Game.drawPlayers();
         Game.drawScore();
+        Game.drawTimeRemaining();
         Game.drawBall();
     }
-}
+};
 Game.drawBoard = function() {
     var ctx = canvas._ctx;
     var halfX = ~~(canvas._canvas.width / 2);
@@ -200,6 +219,32 @@ Game.drawScore = function() {
         ctx.fillText(Game.players[idx].firstName, x, 60);
     });
 };
+Game.drawTimeRemaining = function() {
+    // Don't draw the time until we have a start time and the game is running
+    if (!Game.running || Game.timeStart === null) return;
+
+    // draw the background box
+    var ctx = canvas._ctx;
+    var x = canvas._canvas.width / 2;
+    var y = 35;
+    ctx.fillStyle = Game.themeSecondary;
+    ctx.fillRect(x - 75, y, 150, 60);
+
+    ctx.fillStyle = 'white';
+    ctx.textBaseline = 'top';
+    ctx.textAlign = 'center';
+    ctx.font = '80px Arcade';
+
+    // Calculate the time string using now and timeStart
+    var secondsRunning = Math.floor((new Date().valueOf() - Game.timeStart) / 1000);
+    var secondsFrom2Minutes = (2 * 60) - secondsRunning;
+    var numMinutes = Math.floor(secondsFrom2Minutes / 60);
+    var numSeconds = Math.floor(secondsFrom2Minutes % 60);
+    var timeString = numMinutes.toString() + ':' + ('00' + numSeconds).slice(-2);
+
+    // draw the text
+    ctx.fillText(timeString, x, y);
+};
 Game.drawBall = function() {
     // draw a filled rect on ball position
     var halfWidth = ~~(Game.blockSize / 2);
@@ -209,10 +254,14 @@ Game.drawBall = function() {
         Game.blockSize, Game.blockSize
     );
 };
+Game.increaseSpeed = function() {
+    Game.ball.vel++;
+};
 Game.init = function() {
     // Set the initial ball position
     Game.ball.x = ~~(canvas._canvas.width / 4);
     Game.ball.y = ~~(canvas._canvas.height / 2);
+    Game.ball.xvel = Game.ball.yvel = Game.ball.vel = 2;
     // Load the sounds
     Game.playSounds = true;
     try {
@@ -238,7 +287,7 @@ Game.init = function() {
                 }
                 break;
             case 187: // '=' key  INCR
-                if (Game.ball.xvel < 100) {
+                if (Game.ball.vel < 100) {
                     Game.ball.vel++;
                 }
                 break;
@@ -248,8 +297,9 @@ Game.init = function() {
             default:
                 break;
         }
-    })
-}
+    });
+    Game.timeStart = null;
+};
 
 /* global canvas */
 canvas.create();
