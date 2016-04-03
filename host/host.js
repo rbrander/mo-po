@@ -45,10 +45,11 @@ Game.update = function() {
         Game.running = true;
     }
 
-    // Check for end of game
+    // Check for end of game (2 minutes from timeStart)
     Game.ended = (new Date().valueOf() - Game.timeStart) > (2 * 60 * 1000);
     if (Game.ended) {
         Game.running = false;
+        return;
     }
     
     // Update the ball location based on velocity
@@ -153,11 +154,28 @@ Game.draw = function() {
         ctx.textBaseline = 'top';
         ctx.fillText(statusMessage, 100, canvas._canvas.height - 70);
     } else if (Game.ended) {
+        var centerX = Math.floor(canvas._canvas.width / 2);
+        var centerY = Math.floor(canvas._canvas.height / 2);
         // draw game over screen
         ctx.font = '120px Arcade';
+        ctx.textAlign = 'center';
         ctx.fillStyle = Game.themePrimary;
-        ctx.textBaseline = 'middle';
-        ctx.fillText("Game Over", canvas._canvas.width / 2, canvas._canvas.height / 2);
+        ctx.textBaseline = 'bottom';
+        ctx.fillText("Game Over", centerX, centerY);
+
+        // draw the winner's name or 'tied game'
+        var winner = Game.score[0] === Game.score[1] ? 'tied game' :
+            Game.players[(Game.score[0] > Game.score[1] ? 0 : 1)].firstName + ' wins!';
+        ctx.textBaseline = 'top';
+        ctx.font = '60px Arcade';
+        ctx.fillText(winner, centerX, centerY);
+
+        // draw credits
+        ctx.font = '16px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('made by one of our team members Rob Brander', centerX,
+            canvas._canvas.height - 100);
     } else {
         // draw the background image
         ctx.drawImage(Game.imgBackground, 0, 0,
