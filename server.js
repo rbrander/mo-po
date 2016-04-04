@@ -105,9 +105,9 @@ player.on('connect', function(playerSocket) {
     player.socketId = playerSocket.id;
     player.number = (players.length + 1);
     player.firstName = 'Player ' + player.number;
-    player.lastName = '';
-    player.email = 'pong@rangle.io';
-    player.optIn = true;
+    // player.lastName = '';
+    // player.email = 'pong@rangle.io';
+    // player.optIn = true;
     players.push(player);
     updatePlayers();
     
@@ -120,6 +120,7 @@ player.on('connect', function(playerSocket) {
         if (p.socketId === playerData.socketId) {
           p.centerPos = playerData.centerPos;
           p.paddleWidth = playerData.paddleWidth;
+          p.firstName = playerData.firstName;
         }
       });
       // notify the host of player data change

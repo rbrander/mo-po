@@ -9,7 +9,6 @@ Game.update = function() {
     // because onTouchMove should only be setting state/data
 };
 Game.draw = function() {
-    
     // TODO: add code that will display the status of the host (up/down)
     //       or if waiting for another player
     
@@ -102,7 +101,25 @@ socket.on('connect', function() {
             canvas._canvas.addEventListener("touchmove", Game.onTouchMove, false);
             canvas._canvas.addEventListener("touchend", Game.onTouchEnd, false);
         }
+        // if there was no player data before and there is a name in the query
+        // string, then update the player's data
+        var firstTimeBeingSet = (Game.player === undefined);
         Game.player = playerData;
+        if (firstTimeBeingSet) {
+            // get the firstname from the query string and send it to the server
+            const paramStr = location.search.length > 0 ?
+                location.search.substring(1) : '' // removes the ?
+            const params = paramStr.split('&');
+            const nameQuery = params.filter((str) => str.indexOf('name=') === 0);
+            if (nameQuery.length > 0) {
+                const values = nameQuery.pop().split('=');
+                // values = ['name', firstName];
+                if (values.length >= 2) {
+                    Game.player.firstName = values[1];
+                    socket.emit('player', Game.player);
+                }
+            }
+        }
     });
 });
 
