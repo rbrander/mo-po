@@ -121,6 +121,14 @@ socket.on('connect', function() {
             }
         }
     });
+
+    socket.on('gameOver', function(data) {
+        // data has 'score' and 'players', each are an Array(2)
+        var isTiedGame = (data.score[0] === data.score[1]);
+        var winner = (data.score[0] > data.score[1] ? 
+          data.players[0] : data.players[1]);
+        console.log('Game Over - ' + (isTiedGame ? 'tied game' : winner + ' wins'));
+    })
 });
 
 /* global canvas */

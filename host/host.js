@@ -31,6 +31,7 @@ socket.on('connect', function() {
     });
 });
 
+
 Game.update = function() {
     if (!Game.ready() || Game.ended) {
         return;
@@ -41,14 +42,22 @@ Game.update = function() {
         }
         Game.timeStart = new Date();
         // increase the speed every 10 seconds
-        setInterval(Game.increaseSpeed, 10000);        
+        Game.interval = setInterval(Game.increaseSpeed, 10000);        
         Game.running = true;
     }
 
     // Check for end of game (2 minutes from timeStart)
     Game.ended = (new Date().valueOf() - Game.timeStart) > (2 * 60 * 1000);
     if (Game.ended) {
+        clearInterval(Game.interval);
         Game.running = false;
+        socket.emit('gameOver', {
+            score: Game.score,
+            players: [
+                Game.players[0].firstName,
+                Game.players[1].firstName
+            ]
+        });
         return;
     }
     
@@ -174,7 +183,7 @@ Game.draw = function() {
         ctx.font = '16px Arial';
         ctx.fillStyle = 'white';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('made by one of our team members Rob Brander', centerX,
+        ctx.fillText('made by one of our team members: Rob Brander', centerX,
             canvas._canvas.height - 100);
     } else {
         // draw the background image

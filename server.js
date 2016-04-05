@@ -88,6 +88,15 @@ hoster.on('connect', function(socket) {
     hostSocket = null;
     // TODO: notify players
   });
+
+  hostSocket.on('gameOver', function(data) {
+    var isTiedGame = (data.score[0] === data.score[1]);
+    var winner = (data.score[0] > data.score[1] ? 
+      data.players[0] : data.players[1]);
+    console.log('Game Over - ' + (isTiedGame ? 'tied game' : winner + ' wins'));
+    // notify the players
+    player.emit('gameOver', data);
+  });
 });
 
 var updatePlayers = function() {
@@ -139,7 +148,7 @@ player.on('connect', function(playerSocket) {
       });
       updatePlayers();
       // TOOD: notify the other player their number may have changed
-    })
+    });
   } else {
     // notify the player there aren't any spots left, or put them into a queue
   }
