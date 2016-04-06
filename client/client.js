@@ -3,6 +3,10 @@
 var touchX = null;
 var touchY = null;
 
+// TODO: add better game state
+var gameOver = false;
+
+
 var Game = {};
 Game.update = function() {
     // TODO: move logic from onTouchMove to here, 
@@ -125,12 +129,27 @@ socket.on('connect', function() {
     socket.on('gameOver', function(data) {
         // data has 'score' and 'players', each are an Array(2)
         var isTiedGame = (data.score[0] === data.score[1]);
+
+        var winningPlayer = (data.score[0] > data.score[1] ? 1 : 2);
+        var isWinner = (Game.player.number === winningPlayer);
+
         var winner = (data.score[0] > data.score[1] ? 
           data.players[0] : data.players[1]);
-        console.log('Game Over - ' + (isTiedGame ? 'tied game' : winner + ' wins'));
+        var winningMsg = (isTiedGame ? 'tied game' : 
+            'You ' + (isWinner ? 'win!' : 'lose'));
+        console.log('Game Over - ' + winningMsg);
+        
+        // fill in the winner
+        document.getElementById('winner').innerText = winningMsg;
+
+        // show the game over screen and hide the canvas
+        document.getElementById('gameCanvas').style.display = 'none';
+        document.getElementById('gameOver').style.display = 'block';
+
+        gameOver = true;
     })
 });
 
 /* global canvas */
-canvas.create();
+canvas.create('gameCanvas');
 canvas.cycle(Game.update, Game.draw);

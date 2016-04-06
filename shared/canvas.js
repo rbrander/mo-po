@@ -13,11 +13,14 @@ canvas.clearBackground = function() {
     canvas._ctx.fillRect(0, 0, canvas._canvas.width, canvas._canvas.height);
 };
 
-canvas.create = function() {
+canvas.create = function(id) {
     canvas._canvas = document.createElement('canvas');
     canvas._canvas.width = window.innerWidth;
     canvas._canvas.height = window.innerHeight;
     canvas._ctx = canvas._canvas.getContext('2d');
+    if (id && id.length > 0) {
+        canvas._canvas.id = id;
+    }
     window.addEventListener('resize', function() {
         canvas._canvas.width = window.innerWidth;
         canvas._canvas.height = window.innerHeight;

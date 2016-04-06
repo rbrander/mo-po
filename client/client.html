@@ -7,8 +7,42 @@
     <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon">
     <script type="text/javascript" src="/assets/socket.io-1.2.0.js"></script>
     <script type="text/javascript" src="/shared/canvas.js"></script>
+    <style type="text/css">
+        @font-face {
+            font-family: Arcade;
+            src: url(/assets/fonts/Arcade.ttf);
+        }
+        body {
+          color: white;
+          background: #422E51;
+          margin: 0;
+        }
+        #gameOver {
+          display: none;
+          padding: 20px;
+          font-family: Arcade;
+          text-align: center;
+          font-size: 3rem;
+          color: #E33231;
+        }
+        #gameOver .heading { font-size: 90px; }
+        #gameOver #winner { font-size: 60px; }
+        .credits {
+          color: white;
+          font-size: 1rem;
+          position: absolute;
+          bottom: 40px;
+          text-align: center;
+          font-family: Arial;
+        }
+    </style>
 </head>
-<body style="margin:0">
+<body>
     <script type="text/javascript" src="client.js"></script>
+    <div id="gameOver">
+      <div class="heading">Game Over</div>
+      <div id="winner"></div>
+      <div class="credits">Made by one of our team members: Rob Brander</div>
+    </div>
 </body>
 </html>

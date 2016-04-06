@@ -4,7 +4,7 @@ var Game = {
     hostConnected: false,
     players: [],
     sounds: [],
-    score: [0, 0],
+    score: [10, 0],
     blockSize: 10,  // in pixels
     ball: {
         x: 0,
@@ -19,6 +19,9 @@ var Game = {
     themeSecondary: '#422E51', // purple
     timeStart: null,
 };
+
+// var GAME_TIME_LIMIT = (2 * 60 * 1000); // in seconds
+var GAME_TIME_LIMIT = (2 * 1000); // in seconds
 
 
 /* global io */
@@ -47,7 +50,7 @@ Game.update = function() {
     }
 
     // Check for end of game (2 minutes from timeStart)
-    Game.ended = (new Date().valueOf() - Game.timeStart) > (2 * 60 * 1000);
+    Game.ended = (new Date().valueOf() - Game.timeStart) > GAME_TIME_LIMIT;
     if (Game.ended) {
         clearInterval(Game.interval);
         Game.running = false;
