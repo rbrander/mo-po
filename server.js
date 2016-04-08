@@ -63,9 +63,12 @@ app.post('/client/login.html', function(req, res) {
 var Player = function() {
   this.centerPos = 50;  // 50% from 0 (width/height)
   this.paddleWidth = 25; // 25% of screen height is the paddle width
+  this.status = 'waiting';
+  // socketId, number, firstName are also included
   return this;
 }
 
+var currPlayerID = 1; // each socket connection incrments this id
 var players = [];
 var hostSocket = null;
 
@@ -81,10 +84,11 @@ hoster.on('connect', function(socket) {
   
   hostSocket = socket;
   updatePlayers();
+  selectPlayingPlayers();
   
   hostSocket.on('disconnect', function() {
     console.log('host disconnected');
-    players = [];
+    // players = [];
     hostSocket = null;
     // TODO: notify players
   });
@@ -96,60 +100,97 @@ hoster.on('connect', function(socket) {
     console.log('Game Over - ' + (isTiedGame ? 'tied game' : winner + ' wins'));
     // notify the players
     player.emit('gameOver', data);
+
+    // TODO: change the status of the playing players to done
+    players.forEach(function(player){
+      if (player.status === 'playing') {
+        player.status = 'done';
+      }
+    });
+    updatePlayers();
   });
 });
+
+var player = io.of('/player');
+
+player.on('connect', function(playerSocket) {
+  console.log(' +++ /player onConnect; id = ' + playerSocket.id);
+
+  // add the player
+  var newPlayer = new Player();
+  newPlayer.socketId = playerSocket.id;
+  newPlayer.number = currPlayerID++;
+  newPlayer.firstName = 'Player ' + newPlayer.number;
+  players.push(newPlayer);
+
+  // Update the client with their own details
+  playerSocket.emit('player', newPlayer);
+
+  // Update everyone with the new list
+  updatePlayers();
+
+  // Listen for changes from the client
+  playerSocket.on('player', function(playerData) {
+    console.log(' *** /player onPlayer; id = ' + playerData.socketId);
+    console.log('     ' + JSON.stringify(playerData));
+    // Update the data for the given player
+    players.forEach(function (p) {
+      if (p.socketId === playerData.socketId) {
+        p.centerPos = playerData.centerPos;
+        p.paddleWidth = playerData.paddleWidth;
+        p.firstName = playerData.firstName;
+      }
+    });
+    // notify the host of player data change
+    updatePlayers();
+  });
+
+  // remove the player from the queue
+  playerSocket.on('disconnect', function(reason) {
+    console.log(' --- /player onDisconnect; id = ' + playerSocket.id);
+    // Remove the player from the queue
+    players = players.filter(function(player){
+      return player.socketId !== playerSocket.id
+    });
+    // Update everyone with the new list
+    updatePlayers();
+  });
+
+  selectPlayingPlayers();
+});
+
+var selectPlayingPlayers = function() {
+  // Determine how many players are playing
+  var numPlaying = players.filter(function(player) {
+      return player.status === 'playing';
+    }).length;
+
+  // Check if there are enough players for a game, if so, start one
+  if (numPlaying < 2 && players.length >= 2 && hostSocket !== null) {
+    // Since there may be one player in 'playing' state due to a player
+    // dropping out, we should append additional players as needed
+    var waitingPlayers = players.filter(function(player) {
+      return player.status === 'waiting';
+    });
+    // Iterate until we have 2 players in 'playing' status
+    var numPlayersNeeded = 2 - numPlaying;
+    for (var i = 0; i < numPlayersNeeded && i < waitingPlayers.length; i++) {
+      waitingPlayers[i].status = 'playing';
+    };
+    updatePlayers();
+  }
+};
 
 var updatePlayers = function() {
   if (hostSocket) {
     hostSocket.emit('players', players);
   }
-}
-
-var player = io.of('/player');
-player.on('connect', function(playerSocket) {
-  console.log('connected player: id = ' + playerSocket.id);
-  if (players.length < 2) {
-    // add the player
-    var player = new Player();
-    player.socketId = playerSocket.id;
-    player.number = (players.length + 1);
-    player.firstName = 'Player ' + player.number;
-    players.push(player);
-    updatePlayers();
-    
-    // send the player's details to the player
-    playerSocket.emit('player', player);
-    
-    playerSocket.on('player', function(playerData) {
-      // Update the data for the given player
-      players.forEach(function (p) {
-        if (p.socketId === playerData.socketId) {
-          p.centerPos = playerData.centerPos;
-          p.paddleWidth = playerData.paddleWidth;
-          p.firstName = playerData.firstName;
-        }
-      });
-      // notify the host of player data change
-      updatePlayers();
-    });
-    
-    // remove the player when they disconnect
-    playerSocket.on('disconnect', function() {
-      console.log('player disconnected');
-      players = players.filter(function(p) {
-        return p.socketId !== playerSocket.id;
-      })
-      players.forEach(function(p, idx) {
-        // Reassign player number
-        p.number = idx + 1;
-      });
-      updatePlayers();
-      // TOOD: notify the other player their number may have changed
-    });
-  } else {
-    // notify the player there aren't any spots left, or put them into a queue
+  if (player) {
+    player.emit('players', players);
   }
-});
+  console.log('  # players = ' + players.length);
+};
+
 
 
 // Start the web server

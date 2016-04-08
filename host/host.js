@@ -20,8 +20,7 @@ var Game = {
     timeStart: null,
 };
 
-// var GAME_TIME_LIMIT = (2 * 60 * 1000); // in seconds
-var GAME_TIME_LIMIT = (2 * 1000); // in seconds
+var GAME_TIME_LIMIT = (2 * 60 * 1000); // in seconds
 
 
 /* global io */
@@ -29,8 +28,15 @@ var socket = io('/host');
 socket.on('connect', function() {
     console.log('connected to /host socket');
     Game.hostConnected = true;
-    socket.on('players', function(data) {
-        Game.players = data;
+    socket.on('players', function(allPlayers) {
+        console.log('recieved player list; ' + allPlayers.length + ' players found');
+        Game.allPlayers = allPlayers;
+        Game.players = allPlayers.filter(function(player) {
+            return player.status === 'playing';
+        });
+        console.log('game.players.length = ' + Game.players.length);
+        // Check to see if there was a player dropped; if so, end the game
+
     });
 });
 
@@ -186,7 +192,7 @@ Game.draw = function() {
         ctx.font = '16px Arial';
         ctx.fillStyle = 'white';
         ctx.textBaseline = 'bottom';
-        ctx.fillText('made by one of our team members: Rob Brander', centerX,
+        ctx.fillText('Made by one of our team members: Rob Brander', centerX,
             canvas._canvas.height - 100);
     } else {
         // draw the background image
@@ -293,7 +299,7 @@ Game.init = function() {
     Game.ball.y = ~~(canvas._canvas.height / 2);
     Game.ball.xvel = Game.ball.yvel = Game.ball.vel = 2;
     // Load the sounds
-    Game.playSounds = true;
+    Game.playSounds = false; // true;
     try {
         Game.sounds = {
             ping: new Audio('/assets/ping.mp3'),

@@ -5,12 +5,46 @@ var touchY = null;
 
 // TODO: add better game state
 var gameOver = false;
+var playerPosition = 1;
+
+// for debugging
+var prevStatus = '';
+setInterval(function() {
+    if (Game.player && Game.player.status && prevStatus !== Game.player.status) {
+        console.log('Player status changed to: ' + Game.player.status);
+        prevStatus = Game.player.status;
+    }
+}, 500);
+
+/*
+
+on page load, socket connection made,
+- show greeting screen
+    - welcome msg
+    - host status
+    - player queue status
+    - current player stats (name, status, which side of the screen are they on)
+
+on game start, by status changing to 'playing',
+- start the game
+- in the future, add a countdown to game start
+
+on game end, player status changed to 'done', gameOver event fired,
+- show gameover screen
+    - provide button to play again (reloads current page, forces new socket)
+
+*/
 
 
-var Game = {};
+var Game = {
+    player: undefined,
+    players: [],
+};
 Game.update = function() {
     // TODO: move logic from onTouchMove to here, 
     // because onTouchMove should only be setting state/data
+
+    // TODO: handle state (ie. lobby, gamestart, gameend)
 };
 Game.draw = function() {
     // TODO: add code that will display the status of the host (up/down)
@@ -20,12 +54,34 @@ Game.draw = function() {
     
     var ctx = canvas._ctx;
     
-    ctx.font = '70px Arial';
-    ctx.fillStyle = 'white';
-    ctx.textBaseline = 'top';
-    
-    if (Game.player) {
-        ctx.fillText('Player ' + Game.player.number, 20, 20);
+    // The state will either be waiting or playing;
+    // game over state is handled separately (outside of canvas)
+    var state = (Game.player && Game.player.status && Game.player.status.length > 0) ? Game.player.status : 'waiting';
+
+    if (state === 'waiting') {
+        ctx.font = '30px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textBaseline = 'top';
+        ctx.fillText('Waiting to start...', 20, 20);
+
+        ctx.font = '20px Arial';
+        ctx.fillText('You are player ' + playerPosition + ' of ' + Game.players.length, 20, 60);
+
+        // TODO: add welcome msg
+
+        // TODO: add animation
+
+        // TODO: add host status
+
+        // TODO: add estimated game start
+    } 
+    else if (state === 'playing') {
+        // Display name at the top
+        ctx.font = '70px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textBaseline = 'top';        
+        ctx.fillText(Game.player.firstName, 20, 20);
+
         // draw the bar
         var centerY = ~~((Game.player.centerPos / 100) * canvas._canvas.height);
         var height = ~~((Game.player.paddleWidth / 100) * canvas._canvas.height);
@@ -34,11 +90,7 @@ Game.draw = function() {
         var x = ~~((canvas._canvas.width / 2) - (width / 2));
         ctx.fillStyle = 'white';
         ctx.fillRect(x, y, width, height);
-    } else {
-        // loading
-        ctx.fillText('Loading...', 20, 20);
     }
-    
 };
 Game.setTouchPos = function(e) {
     var touch = e.targetTouches[0];
@@ -92,24 +144,29 @@ Game.onTouchCancel = function(e) {
 var socket = io('/player');
 socket.on('connect', function() {
     console.log('connected to /player socket');
-    
-    // listen for disconnect, game over
+
+    // listen for disconnect
     socket.on('disconnect', function() {
         
     });
     
     socket.on('player', function(playerData) {
-        if (!Game.player) {
+        var firstTimeBeingSet = (Game.player === undefined);
+        // Save a copy of the player data
+        Game.player = playerData;
+
+        console.log('  SocketID: ' + Game.player.socketId);
+
+        console.log('player data: ');
+        console.log(playerData);
+        if (firstTimeBeingSet) {
+            // Setup the event handlers for touch
             canvas._canvas.addEventListener("touchcancel", Game.onTouchCancel, false);
             canvas._canvas.addEventListener("touchstart", Game.onTouchStart, false);
             canvas._canvas.addEventListener("touchmove", Game.onTouchMove, false);
             canvas._canvas.addEventListener("touchend", Game.onTouchEnd, false);
-        }
-        // if there was no player data before and there is a name in the query
-        // string, then update the player's data
-        var firstTimeBeingSet = (Game.player === undefined);
-        Game.player = playerData;
-        if (firstTimeBeingSet) {
+
+            // if there is a name in the query string, then update the player's data
             // get the firstname from the query string and send it to the server
             const paramStr = location.search.length > 0 ?
                 location.search.substring(1) : '' // removes the ?
@@ -124,6 +181,21 @@ socket.on('connect', function() {
                 }
             }
         }
+    });
+
+    socket.on('players', function(allPlayers) {
+        Game.players = allPlayers;
+        // NOTE: the server is in control of the player's status, so when
+        //       there is a change to the status to all players, the local
+        //       player instance must be updated
+        allPlayers.forEach(function(player, idx, arr){
+            if (player.socketId === Game.player.socketId) {
+                // The only field the server can override is the status. All
+                // other fields are managed by the player
+                Game.player.status = player.status;
+                playerPosition = (idx + 1);
+            }
+        })
     });
 
     socket.on('gameOver', function(data) {
