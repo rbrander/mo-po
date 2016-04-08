@@ -13,6 +13,10 @@
         .hidden {
             display:none;
         }
+        .required {
+            color: red;
+
+        }
     </style>
     <script type="text/javascript">
         // NOTE: found on http://stackoverflow.com/questions/46155/validate-email-address-in-javascript
@@ -48,6 +52,8 @@
                 (hasEmailError ? '' : 'hidden');
             hasError |= hasEmailError;
 
+            // NOTE: Job Title and Organization are optional, thus not checked
+
             return !hasError;
         }
     </script>
@@ -59,23 +65,31 @@
             <div>Please provide your name and email to play<div>
             <br />
             <div class="form-group">
-                <label for="txtFirstName">First Name:</label>
+                <label for="txtFirstName"><span class="required">*</span> First Name:</label>
                 <input type="text" id="txtFirstName" name="firstName" maxlength="20" class="form-control" placeholder="First Name" />
                 <span id="errFirstName" class="error hidden">First name is required</span>
             </div>
             <div class="form-group">
-                <label for="txtLastName">Last Name:</label>
+                <label for="txtLastName"><span class="required">*</span> Last Name:</label>
                 <input type="text" id="txtLastName" name="lastName" maxlength="20" class="form-control" placeholder="Last Name" />
                 <span id="errLastName" class="error hidden">Last name is required</span>
             </div>
             <div class="form-group">
-                <label for="txtEmail">Email:</label>
+                <label for="txtEmail"><span class="required">*</span> Email:</label>
                 <input type="text" id="txtEmail" name="email" maxlength="100" class="form-control" placeholder="Email" />
                 <span id="errEmail" class="error hidden">Invalid or missing email address</span>
             </div>
             <div class="form-group">
-                <input type="checkbox" id="chkOptIn" name="optIn" checked />
-                <label for="chkOptIn">Allow rangle.io to contact me</label>
+                <label for="txtJobTitle">Job Title:</label>
+                <input type="text" id="txtJobTitle" name="jobTitle" maxlength="100" class="form-control" placeholder="Job Title" />
+            </div>
+            <div class="form-group">
+                <label for="txtOrganization">Organization:</label>
+                <input type="text" id="txtOrganization" name="organization" maxlength="100" class="form-control" placeholder="Organization" />
+            </div>
+            <div class="form-group">
+                <input type="checkbox" id="chkOptIn" name="optIn" style="width:20px; vertical-align: middle"/>
+                <label for="chkOptIn" style="width: 90%; vertical-align: middle;">Level up your JavaScript skills with the most recent news and learnings from our experts.</label>
             </div>
             <div class="form-group">
                 <input type="submit" class="form-control" value="Login" />

@@ -154,7 +154,7 @@ Game.draw = function() {
     canvas.clearBackground();
     
     // draw the status until we have two players and a host connect to the server
-    if (!Game.ready()) {
+    if (!Game.ready() && !Game.ended) {
         // draw a background image
         ctx.drawImage(Game.imgStartScreen, 0, 0,
             canvas._canvas.width, canvas._canvas.height);
@@ -213,7 +213,9 @@ Game.drawBoard = function() {
     // draw dashed middle line
     ctx.strokeStyle = 'white';
     ctx.lineWidth = Game.blockSize;
-    ctx.setLineDash([Game.blockSize * 3, Game.blockSize * 2]);
+    if (ctx.setLineDash) {
+        ctx.setLineDash([Game.blockSize * 3, Game.blockSize * 2]);
+    }
     ctx.beginPath();
     ctx.moveTo(halfX, 0);
     ctx.lineTo(halfX, canvas._canvas.height);
@@ -299,7 +301,7 @@ Game.init = function() {
     Game.ball.y = ~~(canvas._canvas.height / 2);
     Game.ball.xvel = Game.ball.yvel = Game.ball.vel = 2;
     // Load the sounds
-    Game.playSounds = false; // true;
+    Game.playSounds = true;
     try {
         Game.sounds = {
             ping: new Audio('/assets/ping.mp3'),
