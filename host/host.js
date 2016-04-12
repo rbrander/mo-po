@@ -29,14 +29,11 @@ socket.on('connect', function() {
     console.log('connected to /host socket');
     Game.hostConnected = true;
     socket.on('players', function(allPlayers) {
-        console.log('recieved player list; ' + allPlayers.length + ' players found');
         Game.allPlayers = allPlayers;
         Game.players = allPlayers.filter(function(player) {
             return player.status === 'playing';
         });
-        console.log('game.players.length = ' + Game.players.length);
         // Check to see if there was a player dropped; if so, end the game
-
     });
 });
 

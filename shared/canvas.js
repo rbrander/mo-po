@@ -1,7 +1,7 @@
 // canvas.js
 
 var canvas = {
-    FPS: 60,    // frames per second
+    FPS: 30,    // frames per second
     msPerFrame: function(){ return ~~(1000/canvas.FPS); },
     _canvas: undefined,
     _ctx: undefined,
