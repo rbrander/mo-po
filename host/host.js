@@ -21,8 +21,8 @@ var Game = {
 var BLOCK_SIZE = 10;
 var THEME_PRIMARY_COLOUR = '#E33231'; // red
 var THEME_SECONDARY_COLOUR = '#422E51'; // purple
-var GAME_TIME_LIMIT = (2 * 60 * 1000); // 2 mins in milliseconds
 var GAME_OVER_DELAY = 4000; // in milliseconds
+var GAME_TIME_LIMIT = (2 * 60 * 1000); // 2 mins in milliseconds
 
 
 /* global io */
@@ -172,13 +172,19 @@ Game.draw = function() {
         ctx.textBaseline = 'bottom';
         ctx.fillText("Game Over", centerX, centerY);
 
-        // draw the winner's name or 'tied game'
-        var winner = Game.score[0] === Game.score[1] ? 'tied game' :
-            Game.players[(Game.score[0] > Game.score[1] ? 0 : 1)].firstName + ' wins!';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.font = '60px Arcade';
-        ctx.fillText(winner, centerX, centerY);
+        if (Game.players && Game.players.length > 0) {
+            // draw the winner's name or 'tied game'
+            var winningIdx = (Game.score[0] > Game.score[1] ? 0 : 1);
+            var winner = Game.score[0] === Game.score[1] ? 'tied game' :
+                Game.players[winningIdx].firstName + ' wins!';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.font = '60px Arcade';
+            ctx.fillText(winner, centerX, centerY);
+
+            var scoreStr = Game.score[winningIdx] + ' - ' + Game.score[winningIdx === 0 ? 1 : 0];
+            ctx.fillText(scoreStr, centerX, centerY + 60);
+        }
 
         // draw credits
         ctx.textAlign = 'center';

@@ -109,13 +109,17 @@ hoster.on('connect', function(socket) {
       }).pop();
     console.log('Game Over - ' + (isTiedGame ? 'tied game' : winningPlayer.firstName + ' wins'));
 
-    // Change the status of the playing players to 'done'
-    players.forEach(function(player){
-      if (player.status === 'playing') {
-        player.status = 'done';
-      }
-    });
-    updatePlayers();
+    // Wait for 5 seconds before clear the user's status so the game over screen
+    // can still leverage the results
+    setTimeout(function() {
+      // Change the status of the playing players to 'done'
+      players.forEach(function(player){
+        if (player.status === 'playing') {
+          player.status = 'done';
+        }
+      });
+      updatePlayers();
+    }, 5000);
   });
 });
 
