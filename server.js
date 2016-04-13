@@ -95,15 +95,21 @@ hoster.on('connect', function(socket) {
     // TODO: notify players
   });
 
+  // Called by the host when game is over (time runs out)
   hostSocket.on('gameOver', function(data) {
-    var isTiedGame = (data.score[0] === data.score[1]);
-    var winner = (data.score[0] > data.score[1] ? 
-      data.players[0] : data.players[1]);
-    console.log('Game Over - ' + (isTiedGame ? 'tied game' : winner + ' wins'));
-    // notify the players
+    // Notify the players the game is over
+    // NOTE: this will also be sent to players in the queue
     player.emit('gameOver', data);
 
-    // TODO: change the status of the playing players to done
+    var isTiedGame = (data.score[0] === data.score[1]);
+    var winnerSocketId = (data.score[0] > data.score[1] ? 
+      data.players[0] : data.players[1]);
+    var winningPlayer = players.filter(function(player) {
+        return player.socketId === winnerSocketId;
+      }).pop();
+    console.log('Game Over - ' + (isTiedGame ? 'tied game' : winningPlayer.firstName + ' wins'));
+
+    // Change the status of the playing players to 'done'
     players.forEach(function(player){
       if (player.status === 'playing') {
         player.status = 'done';

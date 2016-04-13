@@ -18,9 +18,11 @@ var Game = {
     themePrimary:'#E33231', // red
     themeSecondary: '#422E51', // purple
     timeStart: null,
+    speedIncreaseInterval: null,
 };
 
-var GAME_TIME_LIMIT = (2 * 60 * 1000); // in seconds
+var GAME_TIME_LIMIT = (2 * 60 * 1000); // in milliseconds
+var GAME_OVER_DELAY = 4000; // in milliseconds
 
 
 /* global io */
@@ -44,27 +46,13 @@ Game.update = function() {
         return;
     }
     if (!Game.running && !Game.ended) {
-        if (Game.playSounds) {
-            Game.sounds.coin.play();
-        }
-        Game.timeStart = new Date();
-        // increase the speed every 10 seconds
-        Game.interval = setInterval(Game.increaseSpeed, 10000);        
-        Game.running = true;
+        Game.startNewGame();
     }
 
     // Check for end of game (2 minutes from timeStart)
     Game.ended = (new Date().valueOf() - Game.timeStart) > GAME_TIME_LIMIT;
     if (Game.ended) {
-        clearInterval(Game.interval);
-        Game.running = false;
-        socket.emit('gameOver', {
-            score: Game.score,
-            players: [
-                Game.players[0].firstName,
-                Game.players[1].firstName
-            ]
-        });
+        Game.endGame();
         return;
     }
     
@@ -295,6 +283,38 @@ Game.drawBall = function() {
 Game.increaseSpeed = function() {
     Game.ball.vel++;
 };
+
+Game.startNewGame = function() {
+    // TODO: Setup initial conditions for lobby
+    if (Game.playSounds) {
+        Game.sounds.coin.play();
+    }
+    Game.timeStart = new Date();
+    // increase the speed every 10 seconds
+    Game.speedIncreaseInterval = window.setInterval(Game.increaseSpeed, 10000);        
+    Game.running = true;
+};
+
+Game.loadLobby = function() {
+
+};
+
+Game.endGame = function() {
+    clearInterval(Game.speedIncreaseInterval);
+    Game.running = false;
+    socket.emit('gameOver', {
+        score: Game.score,
+        players: [
+            Game.players[0].socketId,
+            Game.players[1].socketId
+        ]
+    });
+    // Set a timeout to go back to the home screen
+    window.setTimeout(function() {
+        Game.loadLobby();
+    }, GAME_OVER_DELAY);
+};
+
 Game.init = function() {
     // Set the initial ball position
     Game.ball.x = ~~(canvas._canvas.width / 4);

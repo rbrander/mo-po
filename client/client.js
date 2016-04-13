@@ -3,18 +3,7 @@
 var touchX = null;
 var touchY = null;
 
-// TODO: add better game state
-var gameOver = false;
 var playerPosition = 1;
-
-// for debugging
-var prevStatus = '';
-setInterval(function() {
-    if (Game.player && Game.player.status && prevStatus !== Game.player.status) {
-        console.log('Player status changed to: ' + Game.player.status);
-        prevStatus = Game.player.status;
-    }
-}, 500);
 
 /*
 
@@ -143,22 +132,19 @@ Game.onTouchCancel = function(e) {
 /* global io */
 var socket = io('/player');
 socket.on('connect', function() {
-    console.log('connected to /player socket');
-
-    // listen for disconnect
+    // listen for server disconnect
     socket.on('disconnect', function() {
-        
+        // TODO: handle this gracefully
     });
     
+    // This is fired only once after the player has connected to the server
+    // as a way for the server acknowledge the player and provide initial
+    // state for the player
     socket.on('player', function(playerData) {
         var firstTimeBeingSet = (Game.player === undefined);
         // Save a copy of the player data
         Game.player = playerData;
 
-        console.log('  SocketID: ' + Game.player.socketId);
-
-        console.log('player data: ');
-        console.log(playerData);
         if (firstTimeBeingSet) {
             // Setup the event handlers for touch
             canvas._canvas.addEventListener("touchcancel", Game.onTouchCancel, false);
@@ -177,6 +163,7 @@ socket.on('connect', function() {
                 // values = ['name', firstName];
                 if (values.length >= 2) {
                     Game.player.firstName = values[1];
+                    // Notify the server of the updated values (firstName)
                     socket.emit('player', Game.player);
                 }
             }
@@ -201,15 +188,9 @@ socket.on('connect', function() {
     socket.on('gameOver', function(data) {
         // data has 'score' and 'players', each are an Array(2)
         var isTiedGame = (data.score[0] === data.score[1]);
-
-        var winningPlayer = (data.score[0] > data.score[1] ? 1 : 2);
-        var isWinner = (Game.player.number === winningPlayer);
-
-        var winner = (data.score[0] > data.score[1] ? 
-          data.players[0] : data.players[1]);
-        var winningMsg = (isTiedGame ? 'tied game' : 
-            'You ' + (isWinner ? 'win!' : 'lose'));
-        console.log('Game Over - ' + winningMsg);
+        var winningPlayer = data.players[(data.score[0] > data.score[1] ? 0 : 1)];
+        var isWinner = (Game.player.socketId === winningPlayer);
+        var winningMsg = (isTiedGame ? 'tied game' :  'You ' + (isWinner ? 'win!' : 'lose'));
         
         // fill in the winner
         document.getElementById('winner').innerText = winningMsg;
@@ -217,8 +198,6 @@ socket.on('connect', function() {
         // show the game over screen and hide the canvas
         document.getElementById('gameCanvas').style.display = 'none';
         document.getElementById('gameOver').style.display = 'block';
-
-        gameOver = true;
     })
 });
 
