@@ -21,8 +21,9 @@ var Game = {
 var BLOCK_SIZE = 10;
 var THEME_PRIMARY_COLOUR = '#E33231'; // red
 var THEME_SECONDARY_COLOUR = '#422E51'; // purple
-var GAME_OVER_DELAY = 4000; // in milliseconds
-var GAME_TIME_LIMIT = (2 * 60 * 1000); // 2 mins in milliseconds
+var GAME_OVER_DELAY = 4000; // in milliseconds (this is 1 second behind server sending new players)
+// var GAME_TIME_LIMIT = (2 * 60 * 1000); // 2 mins in milliseconds
+var GAME_TIME_LIMIT = (20 * 1000);
 
 
 /* global io */

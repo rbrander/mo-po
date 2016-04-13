@@ -53,8 +53,10 @@ Game.draw = function() {
         ctx.textBaseline = 'top';
         ctx.fillText('Waiting to start...', 20, 20);
 
-        ctx.font = '20px Arial';
-        ctx.fillText('You are player ' + playerPosition + ' of ' + Game.players.length, 20, 60);
+        if (Game.players.length > 0) {
+            ctx.font = '20px Arial';
+            ctx.fillText('You are player ' + playerPosition + ' of ' + Game.players.length, 20, 60);
+        }
 
         // TODO: add welcome msg
 
@@ -197,6 +199,7 @@ socket.on('connect', function() {
         // show the game over screen and hide the canvas
         document.getElementById('gameCanvas').style.display = 'none';
         document.getElementById('gameOver').style.display = 'block';
+        socket.disconnect();
     })
 });
 

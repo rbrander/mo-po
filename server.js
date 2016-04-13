@@ -90,7 +90,6 @@ hoster.on('connect', function(socket) {
   
   hostSocket.on('disconnect', function() {
     console.log('host disconnected');
-    // players = [];
     hostSocket = null;
     // TODO: notify players
   });
@@ -98,8 +97,9 @@ hoster.on('connect', function(socket) {
   // Called by the host when game is over (time runs out)
   hostSocket.on('gameOver', function(data) {
     // Notify the players the game is over
-    // NOTE: this will also be sent to players in the queue
-    player.emit('gameOver', data);
+    data.players.forEach(function(socketId) {
+      player.to(socketId).emit('gameOver', data);
+    })
 
     var isTiedGame = (data.score[0] === data.score[1]);
     var winnerSocketId = (data.score[0] > data.score[1] ? 
@@ -119,6 +119,7 @@ hoster.on('connect', function(socket) {
         }
       });
       updatePlayers();
+      selectPlayingPlayers();
     }, 5000);
   });
 });
@@ -143,8 +144,6 @@ player.on('connect', function(playerSocket) {
 
   // Listen for changes from the client
   playerSocket.on('player', function(playerData) {
-    console.log(' *** /player onPlayer; id = ' + playerData.socketId);
-    console.log('     ' + JSON.stringify(playerData));
     // Update the data for the given player
     players.forEach(function (p) {
       if (p.socketId === playerData.socketId) {
