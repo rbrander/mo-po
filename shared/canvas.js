@@ -1,7 +1,7 @@
 // canvas.js
 
 var canvas = {
-    FPS: 30,    // frames per second
+    FPS: 60,    // frames per second
     msPerFrame: function(){ return ~~(1000/canvas.FPS); },
     _canvas: undefined,
     _ctx: undefined,
@@ -37,16 +37,29 @@ canvas.cycle = function(fnUpdate, fnDraw) {
     var hasDraw = (fnDraw && typeof(fnDraw) === 'function');
     var hasReqAniFrame = (window.requestAnimationFrame && 
         typeof(window.requestAnimationFrame) === 'function');
-    canvas._cycleInterval = setInterval(function() {
+
+    // Build the game loop which will call update and draw
+    var lastFrame = 0;
+    canvas.fps = 0;
+    var gameLoop = function(now) {
+        // Calculate FPS
+        canvas.fps = (1000 / (now - lastFrame)).toFixed(1);
+        lastFrame = now;
+
+        // Start next iteration
+        if (hasReqAniFrame) {
+            window.requestAnimationFrame(gameLoop);
+        } else {
+            setTimeout(gameLoop.bind(null, new Date().valueOf()), canvas.msPerFrame());
+        }
+
+        // Update and draw
         if (hasUpdate) {
             fnUpdate();
         }
         if (hasDraw) {
-            if (hasReqAniFrame) {
-                window.requestAnimationFrame(fnDraw);
-            } else {
-                fnDraw();
-            }
+            fnDraw();
         }
-    }, canvas.msPerFrame());
+    };
+    gameLoop();
 }

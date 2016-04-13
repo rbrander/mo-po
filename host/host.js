@@ -4,7 +4,7 @@ var Game = {
     hostConnected: false,
     players: [],
     sounds: [],
-    score: [10, 0],
+    score: [0, 0],
     blockSize: 10,  // in pixels
     ball: {
         x: 0,
@@ -18,6 +18,7 @@ var Game = {
     themePrimary:'#E33231', // red
     themeSecondary: '#422E51', // purple
     timeStart: null,
+    lastFPSUpdate: 0,
 };
 
 var GAME_TIME_LIMIT = (2 * 60 * 1000); // in seconds
@@ -39,6 +40,14 @@ socket.on('connect', function() {
 
 
 Game.update = function() {
+    // FPS calculation
+    var now = new Date().valueOf();
+    if (now - Game.lastFPSUpdate > 1000) {
+        Game.fps = canvas.fps;
+        Game.lastFPSUpdate = now;
+    }
+
+    // Game state check
     if (!Game.ready() || Game.ended) {
         return;
     }
@@ -155,7 +164,6 @@ Game.draw = function() {
         // draw a background image
         ctx.drawImage(Game.imgStartScreen, 0, 0,
             canvas._canvas.width, canvas._canvas.height);
-
         // build a status message to display
         var hostMessage = 'Host connect' + (Game.hostConnected ? 'ed' : 'ing');
         var playerMsg = Game.players.length > 0 ?
@@ -165,6 +173,7 @@ Game.draw = function() {
 
         // draw the status message
         ctx.font = '16px Arial';
+        ctx.textAlign = 'left';
         ctx.fillStyle = 'white';
         ctx.textBaseline = 'top';
         ctx.fillText(statusMessage, 100, canvas._canvas.height - 70);
@@ -181,11 +190,13 @@ Game.draw = function() {
         // draw the winner's name or 'tied game'
         var winner = Game.score[0] === Game.score[1] ? 'tied game' :
             Game.players[(Game.score[0] > Game.score[1] ? 0 : 1)].firstName + ' wins!';
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
         ctx.font = '60px Arcade';
         ctx.fillText(winner, centerX, centerY);
 
         // draw credits
+        ctx.textAlign = 'center';
         ctx.font = '16px Arial';
         ctx.fillStyle = 'white';
         ctx.textBaseline = 'bottom';
@@ -202,6 +213,13 @@ Game.draw = function() {
         Game.drawTimeRemaining();
         Game.drawBall();
     }
+
+    // draw fps
+    ctx.textAlign = 'left';
+    ctx.font = '20px Arial';
+    ctx.fillStyle = 'white';
+    ctx.textBaseline = 'top';
+    ctx.fillText('FPS: ' + (Game.fps || 0), 20, 20);
 };
 Game.drawBoard = function() {
     var ctx = canvas._ctx;
