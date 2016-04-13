@@ -18,7 +18,6 @@ var Game = {
     themePrimary:'#E33231', // red
     themeSecondary: '#422E51', // purple
     timeStart: null,
-    lastFPSUpdate: 0,
 };
 
 var GAME_TIME_LIMIT = (2 * 60 * 1000); // in seconds
@@ -40,13 +39,6 @@ socket.on('connect', function() {
 
 
 Game.update = function() {
-    // FPS calculation
-    var now = new Date().valueOf();
-    if (now - Game.lastFPSUpdate > 1000) {
-        Game.fps = canvas.fps;
-        Game.lastFPSUpdate = now;
-    }
-
     // Game state check
     if (!Game.ready() || Game.ended) {
         return;
@@ -213,13 +205,6 @@ Game.draw = function() {
         Game.drawTimeRemaining();
         Game.drawBall();
     }
-
-    // draw fps
-    ctx.textAlign = 'left';
-    ctx.font = '20px Arial';
-    ctx.fillStyle = 'white';
-    ctx.textBaseline = 'top';
-    ctx.fillText('FPS: ' + (Game.fps || 0), 20, 20);
 };
 Game.drawBoard = function() {
     var ctx = canvas._ctx;

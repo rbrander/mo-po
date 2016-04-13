@@ -50,7 +50,9 @@ app.post('/client/login.html', function(req, res) {
     
     // Story user data
     fs.appendFile(USER_DATA, JSON.stringify(body) + '\n', function(err) {
-      console.error('Error writing user data: ' + err);
+      if (err) {
+        console.error('Error writing user data: ' + err);
+      }
     });
 
     // Send the user to the game
