@@ -87,8 +87,7 @@ Game.setTouchPos = function(e) {
     Game.touchY = ~~touch.pageY;
 }
 Game.onTouchStart = function(e) {
-    e.preventDefault();
-    
+    e.preventDefault();    
     Game.touching = true;
     Game.setTouchPos(e);
     Game.setYOffset();            
@@ -190,7 +189,7 @@ socket.on('connect', function() {
         var isTiedGame = (data.score[0] === data.score[1]);
         var winningPlayer = data.players[(data.score[0] > data.score[1] ? 0 : 1)];
         var isWinner = (Game.player.socketId === winningPlayer);
-        var winningMsg = (isTiedGame ? 'tied game' :  'You ' + (isWinner ? 'win!' : 'lose'));
+        var winningMsg = (isTiedGame ? 'tied game' :  'You ' + (isWinner ? 'won!' : 'lost'));
         
         // fill in the winner
         document.getElementById('winner').innerText = winningMsg;

@@ -5,7 +5,6 @@ var Game = {
     players: [],
     sounds: [],
     score: [0, 0],
-    blockSize: 10,  // in pixels
     ball: {
         x: 0,
         y: 0,
@@ -15,30 +14,38 @@ var Game = {
     },
     running: false,
     ended: false,
-    themePrimary:'#E33231', // red
-    themeSecondary: '#422E51', // purple
     timeStart: null,
     speedIncreaseInterval: null,
 };
 
-var GAME_TIME_LIMIT = (2 * 60 * 1000); // in milliseconds
+var BLOCK_SIZE = 10;
+var THEME_PRIMARY_COLOUR = '#E33231'; // red
+var THEME_SECONDARY_COLOUR = '#422E51'; // purple
+var GAME_TIME_LIMIT = (2 * 60 * 1000); // 2 mins in milliseconds
 var GAME_OVER_DELAY = 4000; // in milliseconds
 
 
 /* global io */
 var socket = io('/host');
 socket.on('connect', function() {
-    console.log('connected to /host socket');
     Game.hostConnected = true;
+
     socket.on('players', function(allPlayers) {
         Game.allPlayers = allPlayers;
         Game.players = allPlayers.filter(function(player) {
             return player.status === 'playing';
         });
-        // Check to see if there was a player dropped; if so, end the game
     });
+
+    socket.on('disconnect', function() {
+        Game.hostConnected = false;
+    })
 });
 
+
+Game.ready = function() {
+    return (Game.hostConnected && Game.players && Game.players.length == 2);
+};
 
 Game.update = function() {
     // Game state check
@@ -61,8 +68,8 @@ Game.update = function() {
     Game.ball.y += Game.ball.yvel;
 
     // Bounds checking: Bottom wall hit
-    if (Game.ball.y > canvas._canvas.height - (1.5 * Game.blockSize)) {
-        Game.ball.y = canvas._canvas.height - (1.5 * Game.blockSize);
+    if (Game.ball.y > canvas._canvas.height - (1.5 * BLOCK_SIZE)) {
+        Game.ball.y = canvas._canvas.height - (1.5 * BLOCK_SIZE);
         Game.ball.yvel = -Game.ball.vel;
         if (Game.playSounds) {
             Game.sounds.ping.play();
@@ -70,16 +77,16 @@ Game.update = function() {
     }
 
     // Bounds checking, player 2
-    var borderWidth = (2 * Game.blockSize);
+    var borderWidth = (2 * BLOCK_SIZE);
     var yPct = (Game.ball.y / canvas._canvas.height * 100);
-    if (Game.ball.x > canvas._canvas.width - (3.5 * Game.blockSize)) {
+    if (Game.ball.x > canvas._canvas.width - (3.5 * BLOCK_SIZE)) {
         var player2HalfPaddle = ~~(Game.players[1].paddleWidth / 2);
         var isWithinPlayer2Paddle = (
             (yPct > (Game.players[1].centerPos - player2HalfPaddle)) &&
             (yPct < (Game.players[1].centerPos + player2HalfPaddle))
         );
         if (isWithinPlayer2Paddle) {
-            Game.ball.x = canvas._canvas.width - (3.5 * Game.blockSize);
+            Game.ball.x = canvas._canvas.width - (3.5 * BLOCK_SIZE);
             Game.ball.xvel = -Game.ball.vel;
             if (Game.playSounds) {
                 Game.sounds.pong.play();
@@ -98,8 +105,8 @@ Game.update = function() {
     }
 
     // Bounds checking: Top wall hit
-    if (Game.ball.y < (1.5 * Game.blockSize)) {
-        Game.ball.y = (1.5 * Game.blockSize);
+    if (Game.ball.y < (1.5 * BLOCK_SIZE)) {
+        Game.ball.y = (1.5 * BLOCK_SIZE);
         Game.ball.yvel = Game.ball.vel;
         if (Game.playSounds) {
             Game.sounds.ping.play();
@@ -107,14 +114,14 @@ Game.update = function() {
     }
 
     // Bounds checking, player 1
-    if (Game.ball.x < (3.5 * Game.blockSize)) {
+    if (Game.ball.x < (3.5 * BLOCK_SIZE)) {
         var player1HalfPaddle = ~~(Game.players[0].paddleWidth / 2);
         var isWithinPlayer1Paddle = (
             (yPct > (Game.players[0].centerPos - player1HalfPaddle)) &&
             (yPct < (Game.players[0].centerPos + player1HalfPaddle))
         );
         if (isWithinPlayer1Paddle) {
-            Game.ball.x = 3.5 * Game.blockSize;
+            Game.ball.x = 3.5 * BLOCK_SIZE;
             Game.ball.xvel = Game.ball.vel;
             if (Game.playSounds) {
                 Game.sounds.pong.play();
@@ -132,9 +139,7 @@ Game.update = function() {
         }
     }
 };
-Game.ready = function() {
-    return (Game.hostConnected && Game.players && Game.players.length == 2);
-};
+
 Game.draw = function() {
     var ctx = canvas._ctx;
     canvas.clearBackground();
@@ -163,7 +168,7 @@ Game.draw = function() {
         // draw game over screen
         ctx.font = '120px Arcade';
         ctx.textAlign = 'center';
-        ctx.fillStyle = Game.themePrimary;
+        ctx.fillStyle = THEME_PRIMARY_COLOUR;
         ctx.textBaseline = 'bottom';
         ctx.fillText("Game Over", centerX, centerY);
 
@@ -200,9 +205,9 @@ Game.drawBoard = function() {
     
     // draw dashed middle line
     ctx.strokeStyle = 'white';
-    ctx.lineWidth = Game.blockSize;
+    ctx.lineWidth = BLOCK_SIZE;
     if (ctx.setLineDash) {
-        ctx.setLineDash([Game.blockSize * 3, Game.blockSize * 2]);
+        ctx.setLineDash([BLOCK_SIZE * 3, BLOCK_SIZE * 2]);
     }
     ctx.beginPath();
     ctx.moveTo(halfX, 0);
@@ -211,28 +216,28 @@ Game.drawBoard = function() {
     
     // border on top and bottom
     ctx.fillStyle = 'white';
-    ctx.fillRect(0, 0, canvas._canvas.width, Game.blockSize);
-    ctx.fillRect(0, canvas._canvas.height-Game.blockSize, canvas._canvas.width, Game.blockSize);
+    ctx.fillRect(0, 0, canvas._canvas.width, BLOCK_SIZE);
+    ctx.fillRect(0, canvas._canvas.height-BLOCK_SIZE, canvas._canvas.width, BLOCK_SIZE);
 };
 Game.drawPlayers = function() {
     var ctx = canvas._ctx;
     
     // draw a paddle for each player
-    var tableWidth = canvas._canvas.height - (Game.blockSize * 2);  // 2 * blocksize for border on top and bottom
+    var tableWidth = canvas._canvas.height - (BLOCK_SIZE * 2);  // 2 * blocksize for border on top and bottom
     Game.players.forEach(function(player, idx) {
         var paddleHeight = (player.paddleWidth / 100) * tableWidth;
         var paddleCenter = (player.centerPos / 100) * tableWidth;
         var paddleTop = paddleCenter - (paddleHeight / 2);
-        var xOffset = (idx % 2 == 0 ? (2 * Game.blockSize) : canvas._canvas.width - (3 * Game.blockSize)); 
+        var xOffset = (idx % 2 == 0 ? (2 * BLOCK_SIZE) : canvas._canvas.width - (3 * BLOCK_SIZE)); 
         ctx.fillStyle = 'white';
-        ctx.fillRect(xOffset, paddleTop, Game.blockSize, paddleHeight);
+        ctx.fillRect(xOffset, paddleTop, BLOCK_SIZE, paddleHeight);
     });
 };
 Game.drawScore = function() {
     // Typically the old-skool version had a big pixelated number
     // in each table side
     var ctx = canvas._ctx;
-    ctx.fillStyle = Game.themePrimary;
+    ctx.fillStyle = THEME_PRIMARY_COLOUR;
     ctx.textBaseline = 'top';
     ctx.textAlign = 'center';
     Game.score.forEach(function(score, idx){
@@ -253,7 +258,7 @@ Game.drawTimeRemaining = function() {
     var ctx = canvas._ctx;
     var x = canvas._canvas.width / 2;
     var y = 35;
-    ctx.fillStyle = Game.themeSecondary;
+    ctx.fillStyle = THEME_SECONDARY_COLOUR;
     ctx.fillRect(x - 75, y, 150, 60);
 
     ctx.fillStyle = 'white';
@@ -273,11 +278,11 @@ Game.drawTimeRemaining = function() {
 };
 Game.drawBall = function() {
     // draw a filled rect on ball position
-    var halfWidth = ~~(Game.blockSize / 2);
+    var halfWidth = ~~(BLOCK_SIZE / 2);
     canvas._ctx.fillStyle = 'white';
     canvas._ctx.fillRect(
         Game.ball.x - halfWidth, Game.ball.y - halfWidth,
-        Game.blockSize, Game.blockSize
+        BLOCK_SIZE, BLOCK_SIZE
     );
 };
 Game.increaseSpeed = function() {
@@ -285,6 +290,10 @@ Game.increaseSpeed = function() {
 };
 
 Game.startNewGame = function() {
+    // Set the initial ball position
+    Game.ball.x = ~~(canvas._canvas.width / 4);
+    Game.ball.y = ~~(canvas._canvas.height / 2);
+    Game.ball.xvel = Game.ball.yvel = Game.ball.vel = 2;
     // TODO: Setup initial conditions for lobby
     if (Game.playSounds) {
         Game.sounds.coin.play();
@@ -293,14 +302,21 @@ Game.startNewGame = function() {
     // increase the speed every 10 seconds
     Game.speedIncreaseInterval = window.setInterval(Game.increaseSpeed, 10000);        
     Game.running = true;
+    Game.ended = false;
+    Game.score = [0, 0];
 };
 
 Game.loadLobby = function() {
-
+    Game.running = false;
+    Game.ended = false;
+    Game.timeStart = null;
+    // NOTE: The server picks new players at gameover, so the host will probaly lose the new players being sent
+    // TODO: Fix server to not pick new players at gameover
+    Game.players = [];
 };
 
 Game.endGame = function() {
-    clearInterval(Game.speedIncreaseInterval);
+    Game.speedIncreaseInterval = clearInterval(Game.speedIncreaseInterval);
     Game.running = false;
     socket.emit('gameOver', {
         score: Game.score,
@@ -316,10 +332,6 @@ Game.endGame = function() {
 };
 
 Game.init = function() {
-    // Set the initial ball position
-    Game.ball.x = ~~(canvas._canvas.width / 4);
-    Game.ball.y = ~~(canvas._canvas.height / 2);
-    Game.ball.xvel = Game.ball.yvel = Game.ball.vel = 2;
     // Load the sounds
     Game.playSounds = true;
     try {
@@ -349,14 +361,10 @@ Game.init = function() {
                     Game.ball.vel++;
                 }
                 break;
-            case 80: // p for pause
-                Game.ball.vel = 0;
-                break;
             default:
                 break;
         }
     });
-    Game.timeStart = null;
 };
 
 /* global canvas */
