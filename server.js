@@ -56,8 +56,8 @@ app.post('/client/login.html', function(req, res) {
     });
 
     // Send the user to the game
-    return res.redirect('/client/client.html?name=' + 
-      encodeURIComponent(body.firstName));
+    return res.redirect('/client/client.html?' + 
+      'name=' + encodeURIComponent(body.firstName));
   })
 });
 
