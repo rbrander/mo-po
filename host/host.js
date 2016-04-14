@@ -210,6 +210,7 @@ Game.draw = function() {
 Game.drawBoard = function() {
     var ctx = canvas._ctx;
     var halfX = ~~(canvas._canvas.width / 2);
+    var halfY = ~~(canvas._canvas.height / 2);
     
     // draw dashed middle line
     ctx.strokeStyle = 'white';
@@ -219,7 +220,9 @@ Game.drawBoard = function() {
     }
     ctx.beginPath();
     ctx.moveTo(halfX, 0);
-    ctx.lineTo(halfX, canvas._canvas.height);
+    ctx.lineTo(halfX, halfY - 50);
+    ctx.moveTo(halfX, canvas._canvas.height);
+    ctx.lineTo(halfX, halfY + 50);
     ctx.stroke();
     
     // border on top and bottom
@@ -360,7 +363,7 @@ Game.init = function() {
     }
     // Load images
     Game.imgBackground = new Image(canvas._canvas.width, canvas._canvas.height);
-    Game.imgBackground.src = '/assets/background.png';
+    Game.imgBackground.src = '/assets/host_gameplay_background.gif';
     Game.imgStartScreen = new Image(canvas._canvas.width, canvas._canvas.height);
     Game.imgStartScreen.src = '/assets/start-screen.gif';
     window.addEventListener('keyup', function(e) {
