@@ -177,7 +177,7 @@ var selectPlayingPlayers = function() {
     }).length;
 
   // Check if there are enough players for a game, if so, start one
-  if (numPlaying < 2 && players.length >= 2 && hostSocket !== null) {
+  if (numPlaying < 2 && /* players.length >= 2 && */ hostSocket !== null) {
     // Since there may be one player in 'playing' state due to a player
     // dropping out, we should append additional players as needed
     var waitingPlayers = players.filter(function(player) {
