@@ -7,6 +7,7 @@ var io = require('socket.io')(http);
 var fs = require('fs');
 var PORT = process.env.PORT || 80;
 var USER_DATA = __dirname + '/userdata.txt';
+var GAME_DATA = __dirname + '/gamedata.txt';
 
 // ROUTES
 // - root will be for client files
@@ -56,12 +57,14 @@ app.post('/client/login.html', function(req, res) {
     });
 
     // Send the user to the game
-    return res.redirect('/client/client.html?' + 
-      'name=' + encodeURIComponent(body.firstName));
+    return res.redirect('/client/client.html' + 
+      '?firstName=' + encodeURIComponent(body.firstName) +
+      '&lastName=' + encodeURIComponent(body.lastName));
   })
 });
 
 
+// Model
 var Player = function() {
   this.centerPos = 50;  // 50% from 0 (width/height)
   this.paddleWidth = 25; // 25% of screen height is the paddle width
@@ -70,7 +73,8 @@ var Player = function() {
   return this;
 }
 
-var currPlayerID = 1; // each socket connection incrments this id
+// globals
+var currPlayerID = 1; // each socket connection increments this ID
 var players = [];
 var hostSocket = null;
 
@@ -108,6 +112,20 @@ hoster.on('connect', function(socket) {
         return player.socketId === winnerSocketId;
       }).pop();
     console.log('Game Over - ' + (isTiedGame ? 'tied game' : winningPlayer.firstName + ' wins'));
+
+    // Save game data into a file
+    var gameData = {
+      score: data.score,
+      players: players.filter(function(p) {
+        return data.players.indexOf(p.socketId) > -1;
+      }),
+      finished: new Date().toLocaleString()
+    };
+    fs.appendFile(GAME_DATA, JSON.stringify(gameData) + '\n', function(err) {
+      if (err) {
+        console.error('Error writing game data: ' + err);
+      }
+    });
 
     // Wait for 5 seconds before clear the user's status so the game over screen
     // can still leverage the results
@@ -150,6 +168,7 @@ player.on('connect', function(playerSocket) {
         p.centerPos = playerData.centerPos;
         p.paddleWidth = playerData.paddleWidth;
         p.firstName = playerData.firstName;
+        p.lastName = playerData.lastName;
       }
     });
     // notify the host of player data change

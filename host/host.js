@@ -174,19 +174,17 @@ Game.draw = function() {
         ctx.textBaseline = 'bottom';
         ctx.fillText("Game Over", centerX, centerY);
 
-        if (Game.players && Game.players.length > 0) {
-            // draw the winner's name or 'tied game'
-            var winningIdx = (Game.score[0] > Game.score[1] ? 0 : 1);
-            var winner = Game.score[0] === Game.score[1] ? 'tied game' :
-                Game.players[winningIdx].firstName + ' wins!';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'top';
-            ctx.font = '60px Arcade';
-            ctx.fillText(winner, centerX, centerY);
+        // draw the winner's name or 'tied game'
+        var winningIdx = (Game.score[0] > Game.score[1] ? 0 : 1);
+        var winner = Game.score[0] === Game.score[1] ? 'tied game' :
+            Game.winner + ' wins!';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'top';
+        ctx.font = '60px Arcade';
+        ctx.fillText(winner, centerX, centerY);
 
-            var scoreStr = Game.score[winningIdx] + ' - ' + Game.score[winningIdx === 0 ? 1 : 0];
-            ctx.fillText(scoreStr, centerX, centerY + 60);
-        }
+        var scoreStr = Game.score[winningIdx] + ' - ' + Game.score[winningIdx === 0 ? 1 : 0];
+        ctx.fillText(scoreStr, centerX, centerY + 60);
 
         // draw credits
         ctx.textAlign = 'center';

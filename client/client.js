@@ -155,19 +155,34 @@ socket.on('connect', function() {
 
             // if there is a name in the query string, then update the player's data
             // get the firstname from the query string and send it to the server
-            const paramStr = location.search.length > 0 ?
+            var paramStr = location.search.length > 0 ?
                 location.search.substring(1) : '' // removes the ?
-            const params = paramStr.split('&');
-            const nameQuery = params.filter(function(str) { return str.indexOf('name=') === 0 });
-            if (nameQuery.length > 0) {
-                const values = nameQuery.pop().split('=');
-                // values = ['name', firstName];
-                if (values.length >= 2) {
-                    Game.player.firstName = values[1];
-                    // Notify the server of the updated values (firstName)
-                    socket.emit('player', Game.player);
-                }
+            var params = paramStr.split('&');
+            
+            // Extract the first name
+            var firstName = '';
+            var firstNameQuery = params
+                .filter(function(str) {
+                    return str.indexOf('firstName=') === 0
+                });
+            if (firstNameQuery.length > 0) {
+                firstName = firstNameQuery.pop().split('=')[1];
             }
+            Game.player.firstName = firstName;
+
+            // Extract the last name
+            var lastName = '';
+            var lastNameQuery = params
+                .filter(function(str) {
+                    return str.indexOf('lastName=') === 0
+                });
+            if (lastNameQuery.length > 0) {
+                lastName = lastNameQuery.pop().split('=')[1];
+            }
+            Game.player.lastName = lastName;
+
+            // Notify the server of the updated values (firstName, lastName)
+            socket.emit('player', Game.player);
         }
     });
 

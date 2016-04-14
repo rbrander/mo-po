@@ -3,5 +3,5 @@
 node_modules
 npm-debug.log
 package.tar.gz
-userdata.txt
+*.txt
 
