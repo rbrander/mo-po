@@ -8,22 +8,23 @@ var Game = {
     ball: {
         x: 0,
         y: 0,
-        xvel: 2,
-        yvel: 2,
-        vel: 2
+        xvel: 0,
+        yvel: 0,
+        vel: 0
     },
     running: false,
     ended: false,
     timeStart: null,
     speedIncreaseInterval: null,
+    winner: '',
 };
 
+var INITIAL_VELOCITY = 4;
 var BLOCK_SIZE = 10;
 var THEME_PRIMARY_COLOUR = '#E33231'; // red
 var THEME_SECONDARY_COLOUR = '#422E51'; // purple
-var GAME_OVER_DELAY = 4000; // in milliseconds (this is 1 second behind server sending new players)
-// var GAME_TIME_LIMIT = (2 * 60 * 1000); // 2 mins in milliseconds
-var GAME_TIME_LIMIT = (20 * 1000);
+var GAME_OVER_DELAY = 10000; // in milliseconds (this is 1 second behind server sending new players)
+var GAME_TIME_LIMIT = (2 * 60 * 1000); // 2 mins in milliseconds
 
 
 /* global io */
@@ -300,7 +301,7 @@ Game.startNewGame = function() {
     // Set the initial ball position
     Game.ball.x = ~~(canvas._canvas.width / 4);
     Game.ball.y = ~~(canvas._canvas.height / 2);
-    Game.ball.xvel = Game.ball.yvel = Game.ball.vel = 2;
+    Game.ball.xvel = Game.ball.yvel = Game.ball.vel = INITIAL_VELOCITY;
     // TODO: Setup initial conditions for lobby
     if (Game.playSounds) {
         Game.sounds.coin.play();
@@ -325,6 +326,12 @@ Game.loadLobby = function() {
 Game.endGame = function() {
     Game.speedIncreaseInterval = clearInterval(Game.speedIncreaseInterval);
     Game.running = false;
+
+    // Save winner info
+    var winningIdx = (Game.score[0] > Game.score[1] ? 0 : 1);
+    Game.winner = Game.players[winningIdx].firstName;
+
+    // Notify the server the game is over
     socket.emit('gameOver', {
         score: Game.score,
         players: [

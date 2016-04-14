@@ -5,7 +5,7 @@ var http = require('http').Server(app);
 var formBody = require('body/form');
 var io = require('socket.io')(http);
 var fs = require('fs');
-var PORT = process.env.PONG_PORT || 8080;
+var PORT = process.env.PORT || 80;
 var USER_DATA = __dirname + '/userdata.txt';
 
 // ROUTES
@@ -120,7 +120,7 @@ hoster.on('connect', function(socket) {
       });
       updatePlayers();
       selectPlayingPlayers();
-    }, 5000);
+    }, 11000);
   });
 });
 
@@ -177,7 +177,7 @@ var selectPlayingPlayers = function() {
     }).length;
 
   // Check if there are enough players for a game, if so, start one
-  if (numPlaying < 2 && /* players.length >= 2 && */ hostSocket !== null) {
+  if (numPlaying < 2 && players.length >= 2 && hostSocket !== null) {
     // Since there may be one player in 'playing' state due to a player
     // dropping out, we should append additional players as needed
     var waitingPlayers = players.filter(function(player) {

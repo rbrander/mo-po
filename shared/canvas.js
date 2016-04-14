@@ -15,6 +15,7 @@ canvas.clearBackground = function() {
 
 canvas.create = function(id) {
     canvas._canvas = document.createElement('canvas');
+    canvas._canvas.InnerText = 'Canvas is not supported';
     canvas._canvas.width = window.innerWidth;
     canvas._canvas.height = window.innerHeight;
     canvas._ctx = canvas._canvas.getContext('2d');

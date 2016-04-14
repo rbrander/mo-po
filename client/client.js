@@ -158,7 +158,7 @@ socket.on('connect', function() {
             const paramStr = location.search.length > 0 ?
                 location.search.substring(1) : '' // removes the ?
             const params = paramStr.split('&');
-            const nameQuery = params.filter((str) => str.indexOf('name=') === 0);
+            const nameQuery = params.filter(function(str) { return str.indexOf('name=') === 0 });
             if (nameQuery.length > 0) {
                 const values = nameQuery.pop().split('=');
                 // values = ['name', firstName];
