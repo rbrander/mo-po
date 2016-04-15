@@ -363,7 +363,7 @@ Game.init = function() {
     Game.imgBackground = new Image(canvas._canvas.width, canvas._canvas.height);
     Game.imgBackground.src = '/assets/host_gameplay_background.gif';
     Game.imgStartScreen = new Image(canvas._canvas.width, canvas._canvas.height);
-    Game.imgStartScreen.src = '/assets/start-screen.gif';
+    Game.imgStartScreen.src = '/assets/host_lobby_background.gif';
     window.addEventListener('keyup', function(e) {
         switch (e.which) {
             case 189: // '-' key DECR

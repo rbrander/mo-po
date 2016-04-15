@@ -8,6 +8,7 @@ var fs = require('fs');
 var PORT = process.env.PORT || 80;
 var USER_DATA = __dirname + '/userdata.txt';
 var GAME_DATA = __dirname + '/gamedata.txt';
+var leaderboard = [];
 
 // ROUTES
 // - root will be for client files
@@ -124,6 +125,8 @@ hoster.on('connect', function(socket) {
     fs.appendFile(GAME_DATA, JSON.stringify(gameData) + '\n', function(err) {
       if (err) {
         console.error('Error writing game data: ' + err);
+      } else {
+        loadLeaderboard();
       }
     });
 
@@ -221,10 +224,63 @@ var updatePlayers = function() {
   console.log('  # players = ' + players.length);
 };
 
+var loadLeaderboard = function() {
+  // Read all the gamedata to build a list of winners
+  fs.readFile(GAME_DATA, 'utf8', function (err, data) {
+    if (err) {
+      return console.log(err);
+    }
+    // Breakup the data into lines, each line has a game record
+    var lines = data
+      .split('\n')
+      .filter(function(line) {
+        return line.length > 0;
+      });
+    // Build a list of winning scores
+    var winners = [];
+    lines.forEach(function(line, i) {
+      var gameData = JSON.parse(line);
+
+      var player1 = (gameData.players[0].firstName + ' ' +
+        (gameData.players[0].lastName || '')).trim();
+      var player2 = (gameData.players[1].firstName + ' ' +
+        (gameData.players[1].lastName || '')).trim();
+
+      var isTied = (gameData.score[0] === gameData.score[1]);
+      // When the game is tied, both players are winners
+      if (isTied) {
+        winners.push({ name: player1, score: gameData.score[0] });
+        winners.push({ name: player2, score: gameData.score[1] });
+      } else {
+        if (gameData.score[0] > gameData.score[1]) {
+          winners.push({ name: player1, score: gameData.score[0] });
+        } else {
+          winners.push({ name: player2, score: gameData.score[1] });
+        }
+      }
+    });
+
+    // Sort the winners by score, take the top 10
+    leaderboard = winners.sort(function(a, b) {
+      return (a.score === b.score ? 0 : (a.score > b.score ? -1 : +1));
+    }).filter(function(_, i){
+      return i < 10; // Top 10 winners
+    });
+    console.log('leaderboard: ');
+    leaderboard.forEach(function(person, i) {
+      console.log((i + 1).toString() + ') ' + person.name + ' (' +person.score+ ')')
+    });
+  });
+}
 
 
-// Start the web server
-http.listen(PORT, function() {
-  console.log('listening on *:'+PORT);
-});
+var init = function() {
+  loadLeaderboard();
 
+  // Start the web server
+  http.listen(PORT, function() {
+    console.log('listening on *:'+PORT);
+  });
+}
+
+init();
