@@ -36,26 +36,26 @@ Game.update = function() {
     // TODO: handle state (ie. lobby, gamestart, gameend)
 };
 Game.draw = function() {
-    // TODO: add code that will display the status of the host (up/down)
-    //       or if waiting for another player
-    
-    canvas.clearBackground();
-    
     var ctx = canvas._ctx;
+    canvas.clearBackground();
+    // Draw the background image
+    ctx.drawImage(Game.imgBackground, 0, 0, canvas._canvas.width, canvas._canvas.height);
     
     // The state will either be waiting or playing;
     // game over state is handled separately (outside of canvas)
-    var state = (Game.player && Game.player.status && Game.player.status.length > 0) ? Game.player.status : 'waiting';
-
+    var state = (Game.player && Game.player.status && Game.player.status.length > 0) ? 
+        Game.player.status : 'waiting';
     if (state === 'waiting') {
+        // TODO: add code that will display the status of the host (up/down)
+        //       or if waiting for another player
         ctx.font = '30px Arial';
         ctx.fillStyle = 'white';
         ctx.textBaseline = 'top';
-        ctx.fillText('Waiting to start...', 20, 20);
+        ctx.fillText('Waiting to start...', 40, 150);
 
         if (Game.players.length > 0) {
             ctx.font = '20px Arial';
-            ctx.fillText('You are player ' + playerPosition + ' of ' + Game.players.length, 20, 60);
+            ctx.fillText('You are player ' + playerPosition + ' of ' + Game.players.length, 40, 200);
         }
 
         // TODO: add welcome msg
@@ -67,17 +67,11 @@ Game.draw = function() {
         // TODO: add estimated game start
     } 
     else if (state === 'playing') {
-        // Display name at the top
-        ctx.font = '70px Arial';
-        ctx.fillStyle = 'white';
-        ctx.textBaseline = 'top';        
-        ctx.fillText(Game.player.firstName, 20, 20);
-
         // draw the bar
         var centerY = ~~((Game.player.centerPos / 100) * canvas._canvas.height);
         var height = ~~((Game.player.paddleWidth / 100) * canvas._canvas.height);
         var y = ~~(centerY - (height / 2));
-        var width = ~~(height * 0.2); //~~(canvas._canvas.width * 0.2);
+        var width = ~~(height * 0.2);
         var x = ~~((canvas._canvas.width / 2) - (width / 2));
         ctx.fillStyle = 'white';
         ctx.fillRect(x, y, width, height);
@@ -128,6 +122,12 @@ Game.onTouchEnd = function(e) {
 };
 Game.onTouchCancel = function(e) {
     Game.touching = false;
+};
+
+Game.init = function() {
+    // Load images
+    Game.imgBackground = new Image(canvas._canvas.width, canvas._canvas.height);
+    Game.imgBackground.src = '/assets/client_background.png';
 };
 
 /* global io */
@@ -206,10 +206,10 @@ socket.on('connect', function() {
         var isTiedGame = (data.score[0] === data.score[1]);
         var winningPlayer = data.players[(data.score[0] > data.score[1] ? 0 : 1)];
         var isWinner = (Game.player.socketId === winningPlayer);
-        var winningMsg = (isTiedGame ? 'tied game' :  'You ' + (isWinner ? 'won!' : 'lost'));
+        var winningMsg = (isTiedGame ? 'Tied Game' :  'You ' + (isWinner ? 'Won!' : 'Lost'));
         
         // fill in the winner
-        document.getElementById('winner').innerText = winningMsg;
+        document.getElementById('txtWinner').innerText = winningMsg;
 
         // show the game over screen and hide the canvas
         document.getElementById('gameCanvas').style.display = 'none';
@@ -220,4 +220,5 @@ socket.on('connect', function() {
 
 /* global canvas */
 canvas.create('gameCanvas');
+Game.init();
 canvas.cycle(Game.update, Game.draw);

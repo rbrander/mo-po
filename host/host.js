@@ -180,7 +180,7 @@ Game.draw = function() {
         ctx.textAlign = 'right';
 
         var winningIdx = (Game.score[0] > Game.score[1] ? 0 : 1);
-        var winner = Game.score[0] === Game.score[1] ? 'tied game' :
+        var winner = Game.score[0] === Game.score[1] ? 'Tied game' :
             Game.winner + ' wins!';
 
         // Winner is displayed at 10% width, 80% height
@@ -384,22 +384,6 @@ Game.init = function() {
     Game.imgStartScreen.src = '/assets/host_lobby_background.gif';
     Game.imgGameOver = new Image(canvas._canvas.width, canvas._canvas.height);
     Game.imgGameOver.src = '/assets/host_gameover_background.gif';
-    window.addEventListener('keyup', function(e) {
-        switch (e.which) {
-            case 189: // '-' key DECR
-                if (Game.ball.vel > 0) {
-                    Game.ball.vel--;
-                }
-                break;
-            case 187: // '=' key  INCR
-                if (Game.ball.vel < 100) {
-                    Game.ball.vel++;
-                }
-                break;
-            default:
-                break;
-        }
-    });
 };
 
 /* global canvas */

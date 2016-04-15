@@ -5,6 +5,7 @@
     <meta name="viewport"
         content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
     <link rel="shortcut icon" href="/assets/favicon.ico" type="image/x-icon">
+    <link href="/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <script type="text/javascript" src="/assets/requestAnimationFrame_polyfill.js"></script>
     <script type="text/javascript" src="/assets/socket.io-1.2.0.js"></script>
     <script type="text/javascript" src="/shared/canvas.js"></script>
@@ -14,56 +15,60 @@
             src: url(/assets/fonts/Arcade.ttf);
         }
         body {
-          color: white;
-          background: #422E51;
-          margin: 0;
+            color: white;
+            margin: 0;
+            background: url(/assets/client_background.png) no-repeat fixed center;
+            background-size: cover;
         }
         #gameOver {
-          display: none;
-          padding: 20px;
-          font-family: Arcade;
-          text-align: center;
-          font-size: 3rem;
-          color: #E33231;
+            display: none;
+            margin-top: 100px;
+            padding: 20px 40px;
+            font-family: Arial;
+            text-align: center;
+            font-size: 3rem;
+            color: #E33231;
         }
-        #gameOver .heading { font-size: 90px; }
-        #gameOver #winner { font-size: 60px; }
+        #txtWinner {
+            font-size: 40px;
+            font-weight: bold;
+        }
+        #divFollowRangle {
+            margin-top: 40px;
+            text-align: left;
+            color: white;
+            font-size: 2rem;
+        }
         .credits {
-          color: white;
-          font-size: 1rem;
-          position: absolute;
-          bottom: 60px;
-          left: 0px;
-          width: 100%;
-          text-align: center;
-          font-family: Arial;
+            color: white;
+            font-size: 16px;
+            position: absolute;
+            bottom: 60px;
+            left: 0px;
+            width: 100%;
+            text-align: center;
+            font-family: Arial;
         }
         #gameOver #btnPlayAgain {
-          width: 100%;
-          height: 80px;
-          font-family: Arcade;
-          font-size: 50px;
-          margin-top: 40px;
-          padding-top: 20px;
-          color: #E33231;
-          background-color: #422E51;
-          border: 0;
-          border-top: 3px solid #E33231;
-          border-bottom: 3px solid #E33231;
+            color: white;
+            width: 100%;
+            margin-top: 40px;
         }
     </style>
 </head>
 <body>
     <script type="text/javascript" src="client.js"></script>
     <div id="gameOver">
-      <div class="heading">Game Over</div>
-      <div id="winner"></div>
-      <div>
-        <button id="btnPlayAgain" type="button" onclick="location.reload()">
-          Play Again
-        </button>
-      </div>
-      <div class="credits">Made by one of our team members:<br />Rob Brander</div>
+        <div id="txtWinner">Tied Game</div>
+        <div id="divFollowRangle">
+            Follow <strong>@Rangleio</strong> to see if you made the top 3! Winners will be announced at the end of FITC.
+        </div>
+        <div>
+            <button id="btnPlayAgain" class="btn-danger" type="button" onclick="location.reload()">
+                PLAY AGAIN
+            </button>
+        </div>
+        <div class="credits">Made by one of our team members:<br />Rob Brander</div>
     </div>
 </body>
 </html>
