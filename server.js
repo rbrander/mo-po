@@ -266,7 +266,14 @@ var loadLeaderboard = function() {
     }).filter(function(_, i){
       return i < 10; // Top 10 winners
     });
-    console.log('leaderboard: ');
+
+    // Send the leaderboard to the host, if exists
+    if (hostSocket) {
+      hostSocket.emit('leaderboard', leaderboard);
+    }
+
+    // Display the leaderboard updates on the console
+    console.log('\nLeaderboard: ');
     leaderboard.forEach(function(person, i) {
       console.log((i + 1).toString() + ') ' + person.name + ' (' +person.score+ ')')
     });

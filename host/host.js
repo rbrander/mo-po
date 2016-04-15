@@ -17,6 +17,7 @@ var Game = {
     timeStart: null,
     speedIncreaseInterval: null,
     winner: '',
+    leaderboard: [],
 };
 
 var INITIAL_VELOCITY = 4;
@@ -37,6 +38,10 @@ socket.on('connect', function() {
         Game.players = allPlayers.filter(function(player) {
             return player.status === 'playing';
         });
+    });
+
+    socket.on('leaderboard', function(data) {
+        Game.leaderboard = data;
     });
 
     socket.on('disconnect', function() {
@@ -165,34 +170,47 @@ Game.draw = function() {
         ctx.textBaseline = 'top';
         ctx.fillText(statusMessage, 100, canvas._canvas.height - 70);
     } else if (Game.ended) {
-        var centerX = Math.floor(canvas._canvas.width / 2);
-        var centerY = Math.floor(canvas._canvas.height / 2);
-        // draw game over screen
-        ctx.font = '120px Arcade';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = THEME_PRIMARY_COLOUR;
-        ctx.textBaseline = 'bottom';
-        ctx.fillText("Game Over", centerX, centerY);
+        ctx.drawImage(Game.imgGameOver, 0, 0,
+            canvas._canvas.width, canvas._canvas.height);
 
-        // draw the winner's name or 'tied game'
+        // Draw winner's name
+        ctx.font = '70px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textBaseline = 'top';
+        ctx.textAlign = 'right';
+
         var winningIdx = (Game.score[0] > Game.score[1] ? 0 : 1);
         var winner = Game.score[0] === Game.score[1] ? 'tied game' :
             Game.winner + ' wins!';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'top';
-        ctx.font = '60px Arcade';
-        ctx.fillText(winner, centerX, centerY);
 
-        var scoreStr = Game.score[winningIdx] + ' - ' + Game.score[winningIdx === 0 ? 1 : 0];
-        ctx.fillText(scoreStr, centerX, centerY + 60);
+        // Winner is displayed at 10% width, 80% height
+        ctx.fillText(winner, canvas._canvas.width * 0.55, canvas._canvas.height * 0.8);
 
-        // draw credits
-        ctx.textAlign = 'center';
-        ctx.font = '16px Arial';
-        ctx.fillStyle = 'white';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText('Made by one of our team members: Rob Brander', centerX,
-            canvas._canvas.height - 100);
+        // Draw the leader board
+        // y starts at 26% down
+        var yStart = canvas._canvas.height * 0.26;
+        // x starts at 64% left
+        var xStart = canvas._canvas.width * 0.66;
+        var fillColourValue = 255;
+        Game.leaderboard.forEach(function(person, idx){
+            // Set the colour based on the rank
+            ctx.fillStyle = 'rgb(' + fillColourValue + ', ' + fillColourValue + ', ' + fillColourValue + ')';
+
+            // draw the number
+            ctx.textAlign = 'right';
+            ctx.font = ' 32px Courier';
+            var numStr = ''+('00' + (idx + 1).toString()).substr(-2) + '} ';
+            ctx.fillText(numStr, xStart, yStart);
+
+            // draw the name
+            ctx.textAlign = 'left';
+            ctx.font = '38px Arial';
+            ctx.fillText(person.name, xStart, yStart);
+
+            // Shift the position and colour value
+            yStart += 60;
+            fillColourValue -= 17;
+        });
     } else {
         // draw the background image
         ctx.drawImage(Game.imgBackground, 0, 0,
@@ -364,6 +382,8 @@ Game.init = function() {
     Game.imgBackground.src = '/assets/host_gameplay_background.gif';
     Game.imgStartScreen = new Image(canvas._canvas.width, canvas._canvas.height);
     Game.imgStartScreen.src = '/assets/host_lobby_background.gif';
+    Game.imgGameOver = new Image(canvas._canvas.width, canvas._canvas.height);
+    Game.imgGameOver.src = '/assets/host_gameover_background.gif';
     window.addEventListener('keyup', function(e) {
         switch (e.which) {
             case 189: // '-' key DECR
