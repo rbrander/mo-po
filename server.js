@@ -259,13 +259,32 @@ var loadLeaderboard = function() {
         }
       }
     });
-
     // Sort the winners by score, take the top 10
-    leaderboard = winners.sort(function(a, b) {
-      return (a.score === b.score ? 0 : (a.score > b.score ? -1 : +1));
-    }).filter(function(_, i){
-      return i < 10; // Top 10 winners
-    });
+    leaderboard = winners
+      .reduce(function(results, curr) {
+        // check if the name exists in the results
+        var foundResults = results.filter(function(result) { return result.name === curr.name });
+        var hasName = foundResults.length > 0;
+        // if the name already exists, compare the score, 
+        // if current score is larger, update the score of the person
+        if (hasName) {
+          if (curr.score > foundResults[0].score) {
+            return results.map(function(result) {
+              if (result.name === curr.name) {
+                result.score = curr.score;
+              }
+              return result;
+            });
+          }
+          return results;
+        }
+        return results.concat(curr);
+      }, [])
+      .sort(function(a, b) {
+        return (a.score === b.score ? 0 : (a.score > b.score ? -1 : +1));
+      }).filter(function(_, i){
+        return i < 10; // Top 10 winners
+      });
 
     // Send the leaderboard to the host, if exists
     if (hostSocket) {
