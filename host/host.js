@@ -189,8 +189,8 @@ Game.draw = function() {
         // Draw the leader board
         // y starts at 26% down
         var yStart = canvas._canvas.height * 0.26;
-        // x starts at 64% left
-        var xStart = canvas._canvas.width * 0.66;
+        // x starts at 67% left
+        var xStart = canvas._canvas.width * 0.67;
         var fillColourValue = 255;
         Game.leaderboard.forEach(function(person, idx){
             // Set the colour based on the rank
@@ -199,7 +199,7 @@ Game.draw = function() {
             // draw the number
             ctx.textAlign = 'right';
             ctx.font = ' 32px Courier';
-            var numStr = ''+('00' + (idx + 1).toString()).substr(-2) + '} ';
+            var numStr = ''+('00' + (person.score).toString()).substr(-2) + '} ';
             ctx.fillText(numStr, xStart, yStart);
 
             // draw the name
