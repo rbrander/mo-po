@@ -166,7 +166,7 @@ socket.on('connect', function() {
                     return str.indexOf('firstName=') === 0
                 });
             if (firstNameQuery.length > 0) {
-                firstName = firstNameQuery.pop().split('=')[1];
+                firstName = unescape(firstNameQuery.pop().split('=')[1]);
             }
             Game.player.firstName = firstName;
 
@@ -177,7 +177,7 @@ socket.on('connect', function() {
                     return str.indexOf('lastName=') === 0
                 });
             if (lastNameQuery.length > 0) {
-                lastName = lastNameQuery.pop().split('=')[1];
+                lastName = unescape(lastNameQuery.pop().split('=')[1]);
             }
             Game.player.lastName = lastName;
 
